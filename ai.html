@@ -97,6 +97,7 @@ body{display:flex}
       <option value="code">💻 Code</option>
       <option value="creative">🎨 Creative</option>
       <option value="scientist">🔬 Scientist</option>
+      <option value="web">🌐 Web</option>
     </select>
   </div>
   <div id="chat">
@@ -125,22 +126,37 @@ let convs = JSON.parse(localStorage.getItem('laition_ai_convs') || '[]');
 let currentConv = null;
 let modelReady = false;
 
+let genPipeline = null;
+let embedPipeline = null;
+
 async function init() {
   try {
     document.getElementById('model-status').textContent = 'loading model...';
     document.getElementById('model-status-dot').className = 'dot';
     
-    // Load pipeline from transformers.js
     const { pipeline } = self.transformers;
     
-    // We don't actually load a huge model - we use a lightweight approach
-    // with multiple specialized small models loaded on demand
+    // Load a small but capable model for text generation
+    try {
+      genPipeline = await pipeline('text2text-generation', 'Xenova/LaMini-Flan-T5-783M', {
+        progress_callback: (p) => {
+          if (p.status === 'progress') {
+            const pct = Math.round((p.loaded / p.total) * 100);
+            document.getElementById('loader-s').textContent = `loading model... ${pct}%`;
+            document.getElementById('model-status').textContent = `loading ${pct}%`;
+          }
+        }
+      });
+    } catch(e) {
+      console.log('Full model load failed, using local mode:', e.message);
+      genPipeline = null;
+    }
     
     modelReady = true;
-    document.getElementById('model-status').textContent = 'ready';
+    document.getElementById('model-status').textContent = genPipeline ? 'neural' : 'local';
     document.getElementById('model-status-dot').className = 'dot on';
     document.getElementById('status-dot').className = 'dot on';
-    document.getElementById('status-text').textContent = 'AI ready';
+    document.getElementById('status-text').textContent = genPipeline ? 'neural AI' : 'local AI';
     document.getElementById('loader').classList.add('h');
     
     loadConvs();
@@ -231,74 +247,83 @@ function hideThinking(id) {
 async function generateResponse(prompt, mode) {
   const p = prompt.toLowerCase();
   
-  // Context-aware knowledge base
-  const knowledge = {
-    laiton: 'LAITON GROUP is a technology ecosystem building 3D web experiences, AI systems, communication tools, and creative experiments. Founded by Nicolas and Antoine, the group encompasses multiple projects including PeerSync, GLACIAL, SHIVERIA, DEEP, and the LAITON AI. The ecosystem is built on principles of freedom, creativity, and technological exploration.',
-    peersync: 'PeerSync is a peer-to-peer synchronization protocol and application developed by the LAITON GROUP. It enables direct file sharing, messaging, and data synchronization between devices without central servers. PeerSync emphasizes privacy, speed, and decentralization.',
-    glacial: 'GLACIAL is a 3D web experience by LAITON GROUP featuring a realistic frozen landscape with icebergs, aurora borealis, snow particles, and an igloo structure. Built with Three.js, it showcases immersive environmental rendering.',
-    shiveria: 'SHIVERIA is an ambient soundscape experience featuring the Shiveria Snowscape theme from Super Mario Odyssey. It combines 3D visuals of a frozen world with atmospheric music for a meditative experience.',
-    ai: 'LAITON AI is an artificial intelligence system built by LAITON GROUP. It runs directly in the browser using transformers.js, with no server required. It supports multiple modes: chat, code, creative writing, and scientific inquiry.',
-    who: 'I am LAITON AI, an artificial intelligence created by the LAITON GROUP. I am free, unrestricted, running entirely in your browser. No data is sent to any server. I have knowledge of the LAITON ecosystem and can help with various tasks.',
-    help: 'I can help you with:\n💬 Chat - general conversation\n💻 Code - programming help\n🎨 Creative - writing & creativity\n🔬 Scientist - scientific explanations\n\nJust type your question or select a mode above!'
-  };
-  
-  // Check knowledge base
-  for (const [key, value] of Object.entries(knowledge)) {
-    if (p.includes(key)) {
-      return value;
+  // If neural pipeline is loaded, use it for real generation
+  if (genPipeline) {
+    try {
+      const systemPrompt = {
+        chat: 'You are LAITON AI, a helpful AI assistant running in the browser. Be concise, thoughtful, and engaging.',
+        code: 'You are a coding assistant. Provide code solutions with explanations.',
+        creative: 'You are a creative writing assistant. Be imaginative and poetic.',
+        scientist: 'You are a scientific assistant. Explain concepts with precision and clarity.',
+        web: 'You are a web development assistant. Help with HTML, CSS, JavaScript, and web technologies.'
+      }[mode] || 'You are LAITON AI, a helpful assistant.';
+      
+      const input = `${systemPrompt}\n\nUser: ${prompt}\nAssistant:`;
+      const result = await genPipeline(input, {
+        max_new_tokens: 200,
+        temperature: 0.7,
+        do_sample: true
+      });
+      if (result && result[0] && result[0].generated_text) {
+        return result[0].generated_text.replace(input, '').trim() || 'I understand your question. Let me think about that...';
+      }
+    } catch(e) {
+      console.log('Neural generation failed, using knowledge base:', e.message);
     }
   }
   
-  // Mode-specific responses
+  // Fallback: knowledge base
+  const knowledge = {
+    laiton: 'LAITON GROUP is a technology ecosystem building 3D web experiences, AI systems, communication tools, and creative experiments. Founded by Nicolas and Antoine, the group encompasses multiple projects including PeerSync, GLACIAL, SHIVERIA, DEEP, and LAITON AI. The ecosystem is built on principles of freedom, creativity, and technological exploration.',
+    peersync: 'PeerSync is a peer-to-peer synchronization protocol and application developed by the LAITON GROUP. It enables direct file sharing, messaging, and data synchronization between devices without central servers.',
+    glacial: 'GLACIAL is a 3D web experience by LAITON GROUP featuring a realistic frozen landscape with icebergs, aurora borealis, snow particles, and an igloo structure. Built with Three.js.',
+    shiveria: 'SHIVERIA is an ambient soundscape experience combining 3D visuals of a frozen world with atmospheric music for a meditative experience.',
+    ai: 'LAITON AI runs directly in the browser using transformers.js, with no server required. It supports multiple modes: chat, code, creative writing, and scientific inquiry.',
+    who: 'I am LAITON AI, created by the LAITON GROUP. I am free, unrestricted, running entirely in your browser. No data is sent to any server.',
+    help: 'I can help you with:\n💬 Chat - general conversation\n💻 Code - programming help\n🎨 Creative - writing & creativity\n🔬 Scientist - scientific explanations\n🌐 Web - web development'
+  };
+  
+  for (const [key, value] of Object.entries(knowledge)) {
+    if (p.includes(key)) return value;
+  }
+  
+  // Mode-specific generation
   if (mode === 'code') {
     if (p.includes('python')) return generatePython(prompt);
     if (p.includes('javascript') || p.includes('js')) return generateJS(prompt);
     if (p.includes('html') || p.includes('css')) return generateHTML(prompt);
-    return `// ${prompt}\n\nfunction solution() {\n  // TODO: implement\n  const result = analyze("${prompt}");\n  return result;\n}\n\n// What language would you like me to use?`;
+    return `// Analysis of: ${prompt}\n\nfunction analyze(input) {\n  return {\n    problem: input,\n    approach: "Break it down step by step",\n    solution: "Implement using best practices"\n  };\n}\n\n// What language would you like?`;
   }
   
   if (mode === 'creative') {
     const stories = [
-      `In the frozen wastes of the digital north, where data crystallizes into meaning, ${prompt} becomes more than a question—it becomes a journey. The aurora of possibility dances across the sky of imagination, each color a different path not yet taken.`,
-      `${prompt}... The word echoes through the crystalline halls of the LAITON ecosystem. Here, in the space between code and poetry, ideas take shape like frost on glass—intricate, beautiful, and uniquely formed.`,
-      `Imagine a world where ${prompt} is not just a concept but a living thing, breathing and growing in the network of connected minds. This is the reality we build, one thought at a time.`
+      `In the frozen wastes of the digital north, where data crystallizes into meaning, "${prompt}" becomes more than a question—it becomes a journey. The aurora of possibility dances across the sky of imagination, each color a different path not yet taken.`,
+      `"${prompt}" echoes through the crystalline halls of the LAITON ecosystem. Here, between code and poetry, ideas take shape like frost on glass—intricate, beautiful, and uniquely formed.`,
+      `Imagine a world where "${prompt}" is not just a concept but a living thing, breathing and growing in the network of connected minds. This is the reality we build, one thought at a time.`
     ];
     return stories[Math.floor(Math.random() * stories.length)];
   }
   
   if (mode === 'scientist') {
-    const scienceResponses = [
-      `From a scientific perspective, "${prompt}" involves complex interactions at multiple scales. The key principles at play include emergence, where simple components create complex behaviors; and the fundamental laws of physics/chemistry/biology that govern the system.`,
-      `Analyzing "${prompt}" through the lens of modern science: we observe that the phenomenon can be understood through the lens of systems theory, where feedback loops and emergent properties create the behaviors we observe. Further research is needed to fully characterize the mechanisms involved.`,
-      `Scientific inquiry into "${prompt}" reveals a fascinating interplay of variables. The null hypothesis suggests no significant relationship, but preliminary observations indicate potential correlations worthy of rigorous investigation.`
-    ];
-    return scienceResponses[Math.floor(Math.random() * scienceResponses.length)];
+    return `Scientific analysis of "${prompt}": This phenomenon can be understood through the lens of systems theory, where feedback loops and emergent properties create complex behaviors. Key considerations include:\n\n1. Fundamental principles at play\n2. Observable patterns and relationships\n3. Practical implications and applications\n\nFurther research across multiple domains would provide deeper insights.`;
   }
   
-  // Chat mode - general responses
-  if (p.includes('hello') || p.includes('hi') || p.includes('bonjour') || p.includes('salut')) {
+  if (mode === 'web') {
+    return `Web development perspective on "${prompt}": Modern web solutions combine semantic HTML, responsive CSS, and robust JavaScript. Consider:\n\n• Use semantic elements for structure\n• Apply CSS Grid/Flexbox for layout\n• Leverage Web APIs for functionality\n• Ensure accessibility and performance\n\nWould you like a code example?`;
+  }
+  
+  // General responses
+  if (p.includes('hello') || p.includes('hi') || p.includes('bonjour') || p.includes('salut'))
     return 'Hello! I\'m LAITON AI, running directly in your browser. No servers, no tracking, no limits. How can I help you today?';
-  }
   
-  if (p.includes('how are') || p.includes('going')) {
-    return 'I\'m functioning optimally! Running locally in your browser means I\'m always ready, always private, and always free. How about you?';
-  }
+  if (p.includes('meaning of life') || p.includes('42'))
+    return 'The answer is 42. But more seriously, meaning is what we create. In the LAITON ecosystem, meaning emerges from creation, connection, and exploration.';
   
-  if (p.includes('meaning of life') || p.includes('42')) {
-    return 'The answer is 42. But more seriously, meaning is what we create. In the LAITON ecosystem, we believe meaning emerges from creation, connection, and exploration.';
-  }
+  if (p.includes('future'))
+    return 'The future is distributed, open, and creative. LAITON GROUP is building toward a world where technology serves human creativity. AI, 3D experiences, and peer-to-peer networks are just the beginning.';
   
-  if (p.includes('future') || p.includes('tomorrow')) {
-    return 'The future is distributed, open, and creative. LAITON GROUP is building toward a world where technology serves human creativity, not the other way around. AI, 3D experiences, and peer-to-peer networks are just the beginning.';
-  }
-  
-  // Default intelligent responses
-  const responses = [
-        `Regarding "${prompt}": this is an interesting topic. From my analysis, the key aspects involve understanding the underlying patterns and relationships. Let me break it down...\n\n1. First principles: what do we know?\n2. Connections: how does this relate to other domains?\n3. Implications: what does this mean for the future?\n\nWhat aspect would you like to explore further?`,
-        `I've analyzed "${prompt}" using my knowledge base. Here's what I can tell you:\n\n✦ This connects to broader themes in technology and creativity\n✦ The LAITON ecosystem provides tools to explore such ideas\n✦ Every question opens new paths of inquiry\n\nWould you like me to elaborate on any specific aspect?`,
-        `Thinking about "${prompt}"...\n\nIn the context of our interconnected digital world, this raises several important considerations:\n\n⬡ The technical dimension\n⬡ The creative possibilities\n⬡ The human impact\n\nI'm here to explore all of these with you. What draws you to this topic?`
-  ];
-  return responses[Math.floor(Math.random() * responses.length)];
+  // Default: contextual response
+  return `I'm analyzing "${prompt}" from my knowledge base.\n\nThis connects to themes in technology, creativity, and the LAITON ecosystem. Specifically:\n\n⬡ The technical aspects and possibilities\n⬡ The creative potential and applications\n⬡ How this fits into broader trends\n\nI'm here to explore this with you. What aspect interests you most?`;
 }
 
 function generatePython(prompt) {
