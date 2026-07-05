@@ -2,19 +2,24 @@
 
 Central hub for the LAITON ecosystem.
 
-## pages
+## Pages
 
-| page | url | description |
+| page | type | url |
 |---|---|---|
-| **index** | [/hub](https://laiton-group.github.io/hub) | main dashboard with project links |
-| **igloo** | [/hub/igloo](https://laiton-group.github.io/hub/igloo) | 3D experience (light theme) |
-| **manager** | [/hub/manager](https://laiton-group.github.io/hub/manager) | admin suite: tasks, messages, notifications, employees, emergency broadcast |
+| **index** | hub | [/hub](https://laiton-group.github.io/hub) |
+| **manager** | software | [/hub/manager](https://laiton-group.github.io/hub/manager) |
+| **igloo** | 3D | [/hub/igloo](https://laiton-group.github.io/hub/igloo) |
 
-## assets
+## Assets
 
-- `logo.svg` / `logo-icon.svg` / `favicon.svg` — LAITON brand logos
-- `shiveria.mp3` — ambient music track (Shiveria Snowscape)
+| file | purpose |
+|---|---|
+| `logo.svg` | LAITON brand logo |
+| `logo-icon.svg` | LAITON icon (square) |
+| `favicon.svg` | favicon |
+| `shiveria.mp3` | ambient music track |
 
-## mirror
+## Mirrors & Links
 
-Also available at [laiton.neocities.org](https://laiton.neocities.org)
+- **Neocities**: [laiton.neocities.org](https://laiton.neocities.org)
+- **GitHub**: [github.com/Laiton-Group](https://github.com/Laiton-Group)
