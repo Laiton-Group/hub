@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,shrink-to-fit=no">
+<title>LAITON MANAGER · ecosystem</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#a0a5b1;--surface:#b9bfd0;--surface2:#c5cbdb;--surface3:#d1d6e3;--border:rgba(0,0,0,.08);--text:#1a1a1a;--text2:rgba(0,0,0,.5);--text3:rgba(0,0,0,.25);--accent:#4a6a8a;--red:#b84a4a;--green:#4a8a6a;--amber:#8a7a4a;--font:'IBM Plex Mono',monospace}
+html,body{width:100%;height:100%;background:var(--bg);color:var(--text);font-family:var(--font);font-size:13px;overflow:hidden}
+a{color:var(--text);text-decoration:none}
+input,textarea,select,button{font-family:var(--font);font-size:12px;outline:none}
+/* Login */
+#login{position:fixed;top:0;left:0;width:100%;height:100%;display:flex;justify-content:center;align-items:center;background:var(--bg);z-index:100;transition:opacity .4s}
+#login.h{opacity:0;pointer-events:none}
+#login-box{background:var(--surface2);padding:40px;border:1px solid var(--border);text-align:center;max-width:340px;width:90%}
+#login-box h1{font-size:11px;letter-spacing:6px;text-transform:uppercase;font-weight:400;color:var(--text2);margin-bottom:4px}
+#login-box .sub{font-size:8px;letter-spacing:3px;color:var(--text3);text-transform:uppercase;margin-bottom:24px}
+#login-box input{display:block;width:100%;padding:10px 12px;background:var(--surface3);border:1px solid var(--border);color:var(--text);margin-bottom:8px;font-size:12px}
+#login-box input:focus{border-color:rgba(0,0,0,.2)}
+#login-box button{width:100%;padding:10px;background:var(--text);color:var(--bg);border:none;cursor:pointer;letter-spacing:3px;text-transform:uppercase;font-size:10px;transition:.2s}
+#login-box button:hover{opacity:.85}
+#login-box .error{color:var(--red);font-size:10px;margin-top:8px;display:none}
+#login-box .info{font-size:9px;color:var(--text3);margin-top:16px;letter-spacing:1px}
+/* App */
+#app{display:none;width:100%;height:100%}
+#app.s{display:flex}
+#sidebar{width:220px;min-width:220px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden}
+#sidebar .brand{padding:16px 18px;border-bottom:1px solid var(--border);font-size:9px;letter-spacing:4px;text-transform:uppercase;color:var(--text2)}
+#sidebar .brand span{color:var(--text)}
+#sidebar .user-info{padding:12px 18px;border-bottom:1px solid var(--border);font-size:10px}
+#sidebar .user-info .name{font-weight:500}
+#sidebar .user-info .role{font-size:8px;letter-spacing:2px;text-transform:uppercase;color:var(--text2);margin-top:2px}
+#sidebar nav{padding:8px 0;flex:1;overflow-y:auto}
+#sidebar nav a{display:block;padding:10px 18px;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--text2);transition:.15s;cursor:pointer;border-left:2px solid transparent}
+#sidebar nav a:hover{background:rgba(0,0,0,.03);color:var(--text)}
+#sidebar nav a.active{background:rgba(0,0,0,.04);color:var(--text);border-left-color:var(--text)}
+#sidebar .badge{float:right;background:var(--red);color:#fff;font-size:7px;padding:1px 5px;border-radius:2px}
+#main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+#topbar{display:flex;align-items:center;justify-content:space-between;padding:12px 20px;border-bottom:1px solid var(--border);background:var(--surface);min-height:44px}
+#topbar .page-title{font-size:10px;letter-spacing:4px;text-transform:uppercase;font-weight:500}
+#topbar .actions{display:flex;gap:6px;align-items:center}
+#topbar .actions button{background:var(--surface3);border:1px solid var(--border);padding:5px 10px;cursor:pointer;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--text);transition:.15s}
+#topbar .actions button:hover{background:var(--text);color:var(--bg)}
+#topbar .actions .emergency{background:var(--red);color:#fff;border-color:var(--red)}
+#topbar .actions .emergency:hover{background:#9a3a3a;color:#fff}
+#content{flex:1;overflow-y:auto;padding:20px}
+/* Emergency overlay */
+#emergency-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:var(--red);z-index:200;justify-content:center;align-items:center;text-align:center;flex-direction:column;color:#fff;cursor:pointer}
+#emergency-overlay.s{display:flex}
+#emergency-overlay h1{font-size:clamp(32px,8vw,80px);letter-spacing:12px;text-transform:uppercase;font-weight:600}
+#emergency-overlay .msg{font-size:clamp(14px,3vw,32px);letter-spacing:4px;margin-top:16px;opacity:.8}
+#emergency-overlay .from{font-size:12px;letter-spacing:3px;margin-top:24px;opacity:.4;text-transform:uppercase}
+#emergency-overlay .dismiss{position:fixed;bottom:40px;font-size:10px;letter-spacing:4px;text-transform:uppercase;opacity:.3;transition:.3s}
+#emergency-overlay .dismiss:hover{opacity:.8}
+/* Cards */
+.card{background:var(--surface2);border:1px solid var(--border);padding:16px;margin-bottom:12px}
+.card-title{font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--text2);margin-bottom:8px}
+/* Stats grid */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:20px}
+.stat{background:var(--surface2);border:1px solid var(--border);padding:16px;text-align:center}
+.stat .num{font-size:28px;font-weight:500;letter-spacing:2px}
+.stat .label{font-size:8px;letter-spacing:3px;text-transform:uppercase;color:var(--text2);margin-top:4px}
+/* Tables */
+table{width:100%;border-collapse:collapse;font-size:11px}
+th,td{padding:8px 10px;text-align:left;border-bottom:1px solid var(--border)}
+th{font-size:8px;letter-spacing:3px;text-transform:uppercase;color:var(--text2);font-weight:400}
+tr:hover{background:rgba(0,0,0,.02)}
+/* Forms */
+.form-group{margin-bottom:12px}
+.form-group label{display:block;font-size:8px;letter-spacing:2px;text-transform:uppercase;color:var(--text2);margin-bottom:4px}
+.form-group input,.form-group textarea,.form-group select{width:100%;padding:8px 10px;background:var(--surface3);border:1px solid var(--border);color:var(--text);font-size:11px}
+.form-group textarea{resize:vertical;min-height:60px}
+.btn{display:inline-block;padding:6px 14px;background:var(--text);color:var(--bg);border:none;cursor:pointer;font-size:9px;letter-spacing:2px;text-transform:uppercase;transition:.15s;font-family:var(--font)}
+.btn:hover{opacity:.85}
+.btn-sm{padding:4px 10px;font-size:8px}
+.btn-outline{background:transparent;color:var(--text);border:1px solid var(--border)}
+.btn-outline:hover{background:var(--text);color:var(--bg)}
+.btn-danger{background:var(--red);color:#fff}
+.btn-danger:hover{opacity:.85}
+.btn-green{background:var(--green);color:#fff}
+/* Modal */
+.modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.3);z-index:50;justify-content:center;align-items:center}
+.modal.s{display:flex}
+.modal-box{background:var(--surface2);border:1px solid var(--border);padding:24px;max-width:500px;width:90%;max-height:80vh;overflow-y:auto}
+.modal-box h2{font-size:10px;letter-spacing:4px;text-transform:uppercase;font-weight:500;margin-bottom:16px}
+/* Grid layouts */
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+/* Notifications */
+.notif-list{max-height:400px;overflow-y:auto}
+.notif-item{padding:10px 12px;border-bottom:1px solid var(--border);font-size:11px;cursor:pointer;transition:.15s}
+.notif-item:hover{background:rgba(0,0,0,.02)}
+.notif-item .t{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--text2)}
+.notif-item .d{font-size:10px;margin:2px 0;color:var(--text)}
+.notif-item .time{font-size:8px;color:var(--text3)}
+.notif-item.urgent{border-left:2px solid var(--red)}
+/* Messages */
+.msg-list{max-height:500px;overflow-y:auto}
+.msg-item{padding:12px;border-bottom:1px solid var(--border);font-size:11px;cursor:pointer;transition:.15s}
+.msg-item:hover{background:rgba(0,0,0,.02)}
+.msg-item .from{font-weight:500;font-size:10px;letter-spacing:1px}
+.msg-item .subj{font-size:10px;color:var(--text);margin:2px 0}
+.msg-item .preview{font-size:9px;color:var(--text2)}
+.msg-item .time{font-size:8px;color:var(--text3);float:right}
+/* Tabs */
+.tabs{display:flex;gap:2px;margin-bottom:16px}
+.tabs button{background:var(--surface3);border:1px solid var(--border);border-bottom:none;padding:8px 16px;font-size:9px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;color:var(--text2);font-family:var(--font)}
+.tabs button.active{background:var(--surface2);color:var(--text);border-bottom:1px solid var(--surface2)}
+/* Scrollbar */
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:rgba(0,0,0,.1)}
+@media(max-width:768px){#sidebar{display:none}#sidebar.s{display:flex;position:fixed;top:0;left:0;height:100%;z-index:60}.grid-2{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<div id="login">
+  <div id="login-box">
+    <h1>⬡ LAITON</h1>
+    <div class="sub">manager · ecosystem</div>
+    <input type="text" id="login-user" placeholder="username" autocomplete="off">
+    <input type="password" id="login-pass" placeholder="password">
+    <button id="login-btn">enter</button>
+    <div class="error" id="login-error">invalid credentials</div>
+    <div class="info">super admin: laiton / 1103</div>
+  </div>
+</div>
+
+<div id="emergency-overlay" onclick="dismissEmergency()">
+  <h1 id="emergency-title">⚠</h1>
+  <div class="msg" id="emergency-msg"></div>
+  <div class="from" id="emergency-from"></div>
+  <div class="dismiss">click anywhere to dismiss</div>
+</div>
+
+<div id="app">
+  <div id="sidebar">
+    <div class="brand"><span>⬡</span> LAITON MANAGER</div>
+    <div class="user-info">
+      <div class="name" id="s-user"></div>
+      <div class="role" id="s-role"></div>
+    </div>
+    <nav id="nav">
+      <a class="active" data-page="dashboard">dashboard</a>
+      <a data-page="tasks">tasks <span class="badge" id="task-badge" style="display:none">0</span></a>
+      <a data-page="messages">messages</a>
+      <a data-page="notifications">notifications</a>
+      <a data-page="employees">employees</a>
+      <a data-page="admin" id="nav-admin" style="display:none">admin panel</a>
+      <a data-page="logout" style="margin-top:auto;color:var(--text3)">logout</a>
+    </nav>
+  </div>
+  <div id="main">
+    <div id="topbar">
+      <div class="page-title" id="page-title">dashboard</div>
+      <div class="actions">
+        <button onclick="showNewTaskModal()" id="btn-new-task" style="display:none">+ task</button>
+        <button onclick="showNewMsgModal()" id="btn-new-msg" style="display:none">+ message</button>
+        <button onclick="showEmergencyModal()" id="btn-emergency" class="emergency" style="display:none">⚠ emergency</button>
+      </div>
+    </div>
+    <div id="content"></div>
+  </div>
+</div>
+
+<div class="modal" id="modal">
+  <div class="modal-box" id="modal-content"></div>
+</div>
+
+<script>
+// ===== DATA =====
+const dataKey = 'laiton_manager_data'
+const sessionKey = 'laiton_manager_session'
+const roles = {super_admin:0, admin:1, manager:2, employee:3}
+const roleNames = {super_admin:'super admin', admin:'admin', manager:'manager', employee:'employee'}
+
+const defaultUsers = [
+  {id:1, username:'laiton', password:'1103', role:'super_admin', name:'Laiton', email:'laiton@laiton.group'},
+  {id:2, username:'nicolas', password:'nic0las#77', role:'super_admin', name:'Nicolas', email:'nicolas@laiton.group'},
+  {id:3, username:'antoine', password:'ant01ne*42', role:'admin', name:'Antoine', email:'antoine@laiton.group'},
+  {id:4, username:'theodort', password:'th30d0rt!9', role:'admin', name:'Theodort', email:'theodort@laiton.group'},
+  {id:5, username:'marie', password:'marie2024', role:'manager', name:'Marie', email:'marie@laiton.group'},
+  {id:6, username:'julien', password:'julien2024', role:'employee', name:'Julien', email:'julien@laiton.group'},
+  {id:7, username:'claire', password:'claire2024', role:'employee', name:'Claire', email:'claire@laiton.group'},
+]
+
+function loadData(){
+  try{
+    const d=JSON.parse(localStorage.getItem(dataKey))
+    if(d&&d.users)return d
+  }catch(e){}
+  return null
+}
+
+function initData(){
+  const existing=loadData()
+  if(existing)return existing
+  const data={users:defaultUsers,tasks:[],messages:[],notifications:[],employees:[...defaultUsers.map(u=>({id:u.id,username:u.username,name:u.name,email:u.email,role:u.role,active:true,joined:new Date().toISOString().slice(0,10),phone:''}))],nextId:100,nextMsgId:200,nextNotifId:300}
+  saveData(data)
+  return data
+}
+
+function saveData(d){localStorage.setItem(dataKey,JSON.stringify(d))}
+
+function getSession(){
+  try{return JSON.parse(localStorage.getItem(sessionKey))}catch(e){return null}
+}
+
+function setSession(u){localStorage.setItem(sessionKey,JSON.stringify({id:u.id,username:u.username,name:u.name,role:u.role}))}
+
+function clearSession(){localStorage.removeItem(sessionKey)}
+
+// ===== AUTH =====
+let session = null
+let data = null
+let currentPage = 'dashboard'
+
+function login(username, password){
+  data = initData()
+  const u = data.users.find(x => x.username === username && x.password === password)
+  if(!u) return false
+  session = {id:u.id, username:u.username, name:u.name, role:u.role}
+  setSession(session)
+  renderApp()
+  return true
+}
+
+function logout(){
+  clearSession()
+  session=null
+  document.getElementById('login').classList.remove('h')
+  document.getElementById('app').classList.remove('s')
+}
+
+function renderApp(){
+  document.getElementById('login').classList.add('h')
+  document.getElementById('app').classList.add('s')
+  document.getElementById('s-user').textContent = session.name
+  document.getElementById('s-role').textContent = roleNames[session.role] || session.role
+  const isSuper = session.role === 'super_admin'
+  const isAdmin = isSuper || session.role === 'admin'
+  document.getElementById('nav-admin').style.display = isSuper ? 'block' : 'none'
+  document.getElementById('btn-new-task').style.display = isAdmin || session.role==='manager' ? 'inline-block' : 'none'
+  document.getElementById('btn-new-msg').style.display = 'inline-block'
+  document.getElementById('btn-emergency').style.display = isAdmin ? 'inline-block' : 'none'
+  showPage('dashboard')
+}
+
+// ===== NAVIGATION =====
+document.getElementById('nav').addEventListener('click', e => {
+  const a = e.target.closest('a')
+  if(!a) return
+  const page = a.dataset.page
+  if(page === 'logout'){logout();return}
+  document.querySelectorAll('#nav a').forEach(x => x.classList.remove('active'))
+  a.classList.add('active')
+  showPage(page)
+})
+
+function showPage(page){
+  currentPage = page
+  const titles = {dashboard:'dashboard',tasks:'tasks',messages:'messages',notifications:'notifications',employees:'employees',admin:'admin panel'}
+  document.getElementById('page-title').textContent = titles[page] || page
+  const el = document.getElementById('content')
+  el.innerHTML = ''
+  if(typeof pages[page] === 'function') pages[page](el)
+}
+
+// ===== PAGES =====
+const pages = {}
+
+pages.dashboard = (el) => {
+  const isSuper = session.role === 'super_admin'
+  const isAdmin = isSuper || session.role === 'admin'
+  const tasks = data.tasks
+  const myTasks = tasks.filter(t => t.assignee === session.id || t.createdBy === session.id || isAdmin)
+  const pendingTasks = myTasks.filter(t => t.status !== 'done').length
+  const urgentTasks = myTasks.filter(t => t.priority === 'high' && t.status !== 'done').length
+  const unreadNotifs = data.notifications.filter(n => !n.read && (n.target === 'all' || n.target === session.id)).length
+  const unreadMsgs = data.messages.filter(m => m.to === session.id || m.to === 'all' || (m.to === 'role:'+session.role)).filter(m => !m.read).length
+  const totalEmployees = data.employees.filter(e => e.active).length
+
+  el.innerHTML = `
+    <div class="stats">
+      <div class="stat"><div class="num">${pendingTasks}</div><div class="label">pending tasks</div></div>
+      <div class="stat"><div class="num">${urgentTasks}</div><div class="label">urgent</div></div>
+      <div class="stat"><div class="num">${unreadNotifs+unreadMsgs}</div><div class="label">unread</div></div>
+      <div class="stat"><div class="num">${totalEmployees}</div><div class="label">employees</div></div>
+    </div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">recent notifications</div>
+        <div class="notif-list" id="dash-notifs">${renderNotifList(5)}</div>
+      </div>
+      <div class="card">
+        <div class="card-title">recent messages</div>
+        <div class="msg-list" id="dash-msgs">${renderMsgList(5)}</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">quick actions</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn btn-sm" onclick="showNewTaskModal()">new task</button>
+        <button class="btn btn-sm btn-outline" onclick="showNewMsgModal()">send message</button>
+        ${isAdmin ? `<button class="btn btn-sm btn-danger" onclick="showEmergencyModal()">⚠ emergency</button>` : ''}
+        ${isSuper ? `<button class="btn btn-sm btn-outline" onclick="showPage('admin')">admin panel</button>` : ''}
+      </div>
+    </div>
+  `
+}
+
+pages.tasks = (el) => {
+  const isSuper = session.role === 'super_admin'
+  const isAdmin = isSuper || session.role === 'admin'
+  const tasks = data.tasks
+  const filtered = tasks.filter(t => t.assignee === session.id || t.createdBy === session.id || isAdmin || session.role === 'manager')
+  
+  let html = `
+    <div style="margin-bottom:12px">
+      <select id="task-filter" style="background:var(--surface3);border:1px solid var(--border);padding:6px 10px;color:var(--text);font-size:10px;letter-spacing:1px" onchange="showPage('tasks')">
+        <option value="all">all tasks</option>
+        <option value="pending">pending</option>
+        <option value="in_progress">in progress</option>
+        <option value="done">done</option>
+        <option value="high">high priority</option>
+        <option value="mine">assigned to me</option>
+      </select>
+    </div>
+    <table>
+      <tr><th>title</th><th>assignee</th><th>priority</th><th>status</th><th>due</th><th></th></tr>
+  `
+  const filter = document.getElementById('task-filter')?.value || 'all'
+  let list = [...filtered]
+  if(filter === 'pending') list = list.filter(t => t.status === 'pending')
+  else if(filter === 'in_progress') list = list.filter(t => t.status === 'in_progress')
+  else if(filter === 'done') list = list.filter(t => t.status === 'done')
+  else if(filter === 'high') list = list.filter(t => t.priority === 'high')
+  else if(filter === 'mine') list = list.filter(t => t.assignee === session.id)
+  
+  list.forEach(t => {
+    const assignee = data.employees.find(e => e.id === t.assignee)
+    const creator = data.employees.find(e => e.id === t.createdBy)
+    const statusColors = {pending:'var(--amber)', in_progress:'var(--accent)', done:'var(--green)'}
+    const prioLabels = {low:'low', medium:'med', high:'high'}
+    html += `<tr>
+      <td>${t.title}</td>
+      <td style="font-size:10px;color:var(--text2)">${assignee ? assignee.name : 'unassigned'}</td>
+      <td style="font-size:9px;color:${t.priority === 'high' ? 'var(--red)' : 'var(--text2)'}">${prioLabels[t.priority] || t.priority}</td>
+      <td><span style="font-size:9px;letter-spacing:1px;color:${statusColors[t.status] || 'var(--text2)'}">${t.status.replace('_',' ')}</span></td>
+      <td style="font-size:10px;color:var(--text2)">${t.due || '—'}</td>
+      <td><button class="btn btn-sm btn-outline" onclick="editTask(${t.id})">edit</button>
+      ${isAdmin ? `<button class="btn btn-sm btn-danger" onclick="deleteTask(${t.id})" style="margin-left:4px">del</button>` : ''}</td>
+    </tr>`
+  })
+  html += '</table>'
+  if(list.length === 0) html += '<div style="text-align:center;padding:40px;color:var(--text3);font-size:10px;letter-spacing:2px">no tasks</div>'
+  el.innerHTML = html
+  updateTaskBadge()
+}
+
+pages.messages = (el) => {
+  const msgs = data.messages.filter(m => m.to === session.id || m.to === 'all' || m.from === session.id || (m.to === 'role:'+session.role))
+  el.innerHTML = `
+    <div style="margin-bottom:12px;display:flex;gap:8px">
+      <select id="msg-filter" style="background:var(--surface3);border:1px solid var(--border);padding:6px 10px;color:var(--text);font-size:10px;letter-spacing:1px" onchange="showPage('messages')">
+        <option value="all">all</option>
+        <option value="inbox">inbox</option>
+        <option value="sent">sent</option>
+        <option value="unread">unread</option>
+      </select>
+      <button class="btn btn-sm" onclick="showNewMsgModal()">+ compose</button>
+    </div>
+    <div class="msg-list">${renderMsgList(999, document.getElementById('msg-filter')?.value || 'all')}</div>
+  `
+}
+
+pages.notifications = (el) => {
+  const notifs = data.notifications.filter(n => n.target === 'all' || n.target === session.id || n.target === 'role:'+session.role)
+  el.innerHTML = `
+    <div style="margin-bottom:12px;display:flex;gap:8px">
+      <button class="btn btn-sm btn-outline" onclick="markAllRead()">mark all read</button>
+      <button class="btn btn-sm btn-outline" onclick="clearNotifs()">clear all</button>
+    </div>
+    <div class="notif-list">${renderNotifList(999, document.getElementById('notif-filter')?.value || 'all')}</div>
+  `
+}
+
+pages.employees = (el) => {
+  const isSuper = session.role === 'super_admin'
+  const isAdmin = isSuper || session.role === 'admin'
+  const emps = data.employees
+
+  let html = `
+    <div style="margin-bottom:12px;display:flex;gap:8px;align-items:center">
+      ${isAdmin ? `<button class="btn btn-sm" onclick="showEmployeeModal()">+ employee</button>` : ''}
+      <span style="font-size:9px;color:var(--text2);letter-spacing:1px">${emps.filter(e=>e.active).length} active · ${emps.filter(e=>!e.active).length} inactive</span>
+    </div>
+    <table>
+      <tr><th>name</th><th>username</th><th>role</th><th>email</th><th>status</th>${isAdmin?'<th></th>':''}</tr>
+  `
+  emps.forEach(e => {
+    html += `<tr>
+      <td>${e.name}</td>
+      <td style="font-size:10px;color:var(--text2)">${e.username}</td>
+      <td style="font-size:9px;letter-spacing:1px;text-transform:uppercase">${roleNames[e.role]||e.role}</td>
+      <td style="font-size:10px;color:var(--text2)">${e.email}</td>
+      <td><span style="font-size:8px;color:${e.active?'var(--green)':'var(--red)'}">${e.active?'active':'inactive'}</span></td>
+      ${isAdmin ? `<td><button class="btn btn-sm btn-outline" onclick="editEmployee(${e.id})">edit</button></td>` : ''}
+    </tr>`
+  })
+  html += '</table>'
+  el.innerHTML = html
+}
+
+pages.admin = (el) => {
+  if(session.role !== 'super_admin'){el.innerHTML='<div style="padding:40px;text-align:center;color:var(--text3)">access denied</div>';return}
+  const emps = data.employees
+  el.innerHTML = `
+    <div class="stats">
+      <div class="stat"><div class="num">${emps.length}</div><div class="label">total accounts</div></div>
+      <div class="stat"><div class="num">${data.tasks.length}</div><div class="label">total tasks</div></div>
+      <div class="stat"><div class="num">${data.messages.length}</div><div class="label">messages sent</div></div>
+      <div class="stat"><div class="num">${data.notifications.length}</div><div class="label">notifications</div></div>
+    </div>
+    <div class="card">
+      <div class="card-title">system logs (last 10 actions)</div>
+      <div style="font-size:9px;color:var(--text2);line-height:2">
+        ${(data.logs||[]).slice(-10).reverse().map(l => `<div>${l}</div>`).join('') || '<div style="color:var(--text3)">no logs yet</div>'}
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">data management</div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-sm btn-outline" onclick="if(confirm('reset all data?')){localStorage.removeItem(dataKey);location.reload()}">reset all data</button>
+        <button class="btn btn-sm btn-outline" onclick="exportData()">export JSON</button>
+      </div>
+    </div>
+  `
+}
+
+// ===== RENDER HELPERS =====
+function renderNotifList(limit, filter){
+  let notifs = data.notifications.filter(n => n.target === 'all' || n.target === session.id || n.target === 'role:'+session.role)
+  if(filter === 'unread') notifs = notifs.filter(n => !n.read)
+  notifs.sort((a,b) => b.time - a.time)
+  if(notifs.length === 0) return '<div style="padding:20px;text-align:center;color:var(--text3);font-size:10px">no notifications</div>'
+  return notifs.slice(0,limit).map(n => `
+    <div class="notif-item ${n.urgent?'urgent':''}" onclick="${n.read?'':'markNotifRead('+n.id+')'}">
+      <div class="t">${n.type || 'notification'} ${n.urgent?'⚠':''}${!n.read?' ●':''}</div>
+      <div class="d">${n.text}</div>
+      <div class="time">${timeAgo(n.time)}${n.fromName ? ' · from '+n.fromName : ''}</div>
+    </div>
+  `).join('')
+}
+
+function renderMsgList(limit, filter){
+  let msgs = data.messages.filter(m => m.to === session.id || m.to === 'all' || m.from === session.id || (m.to === 'role:'+session.role))
+  if(filter === 'inbox') msgs = msgs.filter(m => m.to === session.id || m.to === 'all' || m.to === 'role:'+session.role)
+  else if(filter === 'sent') msgs = msgs.filter(m => m.from === session.id)
+  else if(filter === 'unread') msgs = msgs.filter(m => !m.read && (m.to === session.id || m.to === 'all' || m.to === 'role:'+session.role))
+  msgs.sort((a,b) => b.time - a.time)
+  if(msgs.length === 0) return '<div style="padding:20px;text-align:center;color:var(--text3);font-size:10px">no messages</div>'
+  return msgs.slice(0,limit).map(m => {
+    const from = data.employees.find(e => e.id === m.from)
+    return `<div class="msg-item" onclick="viewMsg(${m.id})">
+      <span class="time">${timeAgo(m.time)}</span>
+      <div class="from">${from ? from.name : 'system'} ${!m.read && m.to === session.id ? '●' : ''}</div>
+      <div class="subj">${m.subject}</div>
+      <div class="preview">${m.body.slice(0,80)}${m.body.length>80?'...':''}</div>
+    </div>`
+  }).join('')
+}
+
+function timeAgo(ts){
+  const d = new Date(ts), now = new Date()
+  const diff = Math.floor((now - d)/1000)
+  if(diff < 60) return 'just now'
+  if(diff < 3600) return Math.floor(diff/60)+'m ago'
+  if(diff < 86400) return Math.floor(diff/3600)+'h ago'
+  return d.toLocaleDateString()
+}
+
+function updateTaskBadge(){
+  const b = document.getElementById('task-badge')
+  const count = data.tasks.filter(t => t.assignee === session.id && t.status !== 'done').length
+  if(count > 0){b.textContent=count;b.style.display='inline'}else{b.style.display='none'}
+}
+
+// ===== MODALS =====
+function showModal(html){
+  document.getElementById('modal-content').innerHTML = html
+  document.getElementById('modal').classList.add('s')
+}
+
+function hideModal(){
+  document.getElementById('modal').classList.remove('s')
+}
+
+document.getElementById('modal').addEventListener('click', e => {
+  if(e.target === document.getElementById('modal')) hideModal()
+})
+
+// Task modal
+function showNewTaskModal(){
+  const empOpts = data.employees.filter(e => e.active).map(e => `<option value="${e.id}">${e.name}</option>`).join('')
+  showModal(`
+    <h2>new task</h2>
+    <div class="form-group"><label>title</label><input id="task-title"></div>
+    <div class="form-group"><label>description</label><textarea id="task-desc" rows="3"></textarea></div>
+    <div class="grid-2">
+      <div class="form-group"><label>assignee</label><select id="task-assignee"><option value="">unassigned</option>${empOpts}</select></div>
+      <div class="form-group"><label>priority</label><select id="task-priority"><option value="low">low</option><option value="medium" selected>medium</option><option value="high">high</option></select></div>
+    </div>
+    <div class="form-group"><label>due date (optional)</label><input id="task-due" placeholder="YYYY-MM-DD"></div>
+    <div style="display:flex;gap:8px;margin-top:16px">
+      <button class="btn" onclick="createTask()">create</button>
+      <button class="btn btn-outline" onclick="hideModal()">cancel</button>
+    </div>
+  `)
+}
+
+function createTask(){
+  const title = document.getElementById('task-title').value.trim()
+  if(!title) return
+  data.tasks.push({
+    id: data.nextId++,
+    title,
+    desc: document.getElementById('task-desc').value.trim(),
+    assignee: parseInt(document.getElementById('task-assignee').value) || null,
+    priority: document.getElementById('task-priority').value,
+    status: 'pending',
+    due: document.getElementById('task-due').value || '',
+    createdBy: session.id,
+    createdAt: Date.now()
+  })
+  addLog(session.name+' created task: '+title)
+  saveData(data)
+  hideModal()
+  showPage(currentPage)
+}
+
+function editTask(id){
+  const t = data.tasks.find(x => x.id === id)
+  if(!t) return
+  const empOpts = data.employees.filter(e => e.active).map(e => `<option value="${e.id}" ${e.id===t.assignee?'selected':''}>${e.name}</option>`).join('')
+  showModal(`
+    <h2>edit task</h2>
+    <div class="form-group"><label>title</label><input id="task-title" value="${t.title}"></div>
+    <div class="form-group"><label>description</label><textarea id="task-desc" rows="3">${t.desc||''}</textarea></div>
+    <div class="grid-2">
+      <div class="form-group"><label>assignee</label><select id="task-assignee"><option value="">unassigned</option>${empOpts}</select></div>
+      <div class="form-group"><label>priority</label><select id="task-priority"><option value="low" ${t.priority==='low'?'selected':''}>low</option><option value="medium" ${t.priority==='medium'?'selected':''}>medium</option><option value="high" ${t.priority==='high'?'selected':''}>high</option></select></div>
+    </div>
+    <div class="form-group"><label>status</label><select id="task-status"><option value="pending" ${t.status==='pending'?'selected':''}>pending</option><option value="in_progress" ${t.status==='in_progress'?'selected':''}>in progress</option><option value="done" ${t.status==='done'?'selected':''}>done</option></select></div>
+    <div class="form-group"><label>due date</label><input id="task-due" value="${t.due}" placeholder="YYYY-MM-DD"></div>
+    <div style="display:flex;gap:8px;margin-top:16px">
+      <button class="btn" onclick="saveTask(${id})">save</button>
+      <button class="btn btn-outline" onclick="hideModal()">cancel</button>
+    </div>
+  `)
+  document.getElementById('task-assignee').value = t.assignee || ''
+}
+
+function saveTask(id){
+  const t = data.tasks.find(x => x.id === id)
+  if(!t) return
+  t.title = document.getElementById('task-title').value.trim()
+  t.desc = document.getElementById('task-desc').value.trim()
+  t.assignee = parseInt(document.getElementById('task-assignee').value) || null
+  t.priority = document.getElementById('task-priority').value
+  t.status = document.getElementById('task-status').value
+  t.due = document.getElementById('task-due').value
+  addLog(session.name+' updated task: '+t.title)
+  saveData(data)
+  hideModal()
+  showPage(currentPage)
+}
+
+function deleteTask(id){
+  if(!confirm('delete this task?')) return
+  data.tasks = data.tasks.filter(t => t.id !== id)
+  addLog(session.name+' deleted task #'+id)
+  saveData(data)
+  showPage(currentPage)
+}
+
+// Message modal
+function showNewMsgModal(){
+  const empOpts = data.employees.filter(e => e.active).map(e => `<option value="${e.id}">${e.name}</option>`).join('')
+  showModal(`
+    <h2>new message</h2>
+    <div class="form-group"><label>to</label>
+      <select id="msg-to">
+        <option value="">select recipient</option>
+        <optgroup label="individuals">${empOpts}</optgroup>
+        <option value="all">all employees</option>
+        <option value="role:super_admin">all super admins</option>
+        <option value="role:admin">all admins</option>
+        <option value="role:manager">all managers</option>
+        <option value="role:employee">all employees</option>
+      </select>
+    </div>
+    <div class="form-group"><label>subject</label><input id="msg-subject"></div>
+    <div class="form-group"><label>message</label><textarea id="msg-body" rows="5"></textarea></div>
+    <div style="display:flex;gap:8px;margin-top:16px">
+      <button class="btn" onclick="sendMsg()">send</button>
+      <button class="btn btn-outline" onclick="hideModal()">cancel</button>
+    </div>
+  `)
+}
+
+function sendMsg(){
+  const to = document.getElementById('msg-to').value
+  const subject = document.getElementById('msg-subject').value.trim()
+  const body = document.getElementById('msg-body').value.trim()
+  if(!to || !subject || !body) return
+  data.messages.push({
+    id: data.nextMsgId++,
+    from: session.id,
+    to,
+    subject,
+    body,
+    time: Date.now(),
+    read: false
+  })
+  addLog(session.name+' sent message: '+subject)
+  // Create notification for recipients
+  data.notifications.push({
+    id: data.nextNotifId++,
+    type: 'message',
+    text: 'New message: '+subject,
+    target: to,
+    fromName: session.name,
+    time: Date.now(),
+    read: false,
+    urgent: false
+  })
+  saveData(data)
+  hideModal()
+  showPage(currentPage)
+}
+
+function viewMsg(id){
+  const m = data.messages.find(x => x.id === id)
+  if(!m) return
+  if(!m.read && (m.to === session.id || m.to === 'all')){m.read=true;saveData(data)}
+  const from = data.employees.find(e => e.id === m.from)
+  const toStr = m.to === 'all' ? 'all employees' : m.to.startsWith('role:') ? roleNames[m.to.slice(5)]+'s' : (data.employees.find(e=>e.id==parseInt(m.to))?.name||'unknown')
+  showModal(`
+    <h2>${m.subject}</h2>
+    <div style="font-size:9px;color:var(--text2);margin-bottom:12px;letter-spacing:1px">
+      from: ${from?from.name:'system'} · to: ${toStr} · ${new Date(m.time).toLocaleString()}
+    </div>
+    <div style="font-size:11px;line-height:1.6;white-space:pre-wrap">${m.body}</div>
+    <div style="margin-top:16px;display:flex;gap:8px">
+      <button class="btn btn-sm btn-outline" onclick="hideModal();showNewMsgModal();document.getElementById('msg-subject').value='Re: ${m.subject}'">reply</button>
+      <button class="btn btn-sm btn-outline" onclick="hideModal()">close</button>
+    </div>
+  `)
+}
+
+// Emergency
+function showEmergencyModal(){
+  showModal(`
+    <h2>⚠ emergency broadcast</h2>
+    <div class="form-group"><label>title (big text)</label><input id="em-title" value="⚠ EMERGENCY"></div>
+    <div class="form-group"><label>message</label><textarea id="em-msg" rows="4"></textarea></div>
+    <div class="form-group"><label>target</label>
+      <select id="em-target">
+        <option value="all">all employees</option>
+        <option value="role:super_admin">super admins only</option>
+        <option value="role:admin">admins only</option>
+        <option value="role:manager">managers only</option>
+        <option value="role:employee">employees only</option>
+      </select>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:16px">
+      <button class="btn btn-danger" onclick="sendEmergency()">⚠ broadcast</button>
+      <button class="btn btn-outline" onclick="hideModal()">cancel</button>
+    </div>
+  `)
+}
+
+function sendEmergency(){
+  const title = document.getElementById('em-title').value.trim()
+  const msg = document.getElementById('em-msg').value.trim()
+  const target = document.getElementById('em-target').value
+  if(!msg) return
+  data.notifications.push({
+    id: data.nextNotifId++,
+    type: 'emergency',
+    text: msg,
+    target,
+    fromName: session.name,
+    time: Date.now(),
+    read: false,
+    urgent: true
+  })
+  addLog('⚠ EMERGENCY from '+session.name+': '+msg)
+  saveData(data)
+  hideModal()
+  // Show full-screen overlay if currently logged in user matches target
+  if(target === 'all' || target === session.id || target === 'role:'+session.role){
+    showEmergencyOverlay(title, msg, session.name)
+  }
+  showPage(currentPage)
+}
+
+function showEmergencyOverlay(title, msg, from){
+  document.getElementById('emergency-title').textContent = title
+  document.getElementById('emergency-msg').textContent = msg
+  document.getElementById('emergency-from').textContent = 'from: '+from
+  document.getElementById('emergency-overlay').classList.add('s')
+}
+
+function dismissEmergency(){
+  document.getElementById('emergency-overlay').classList.remove('s')
+}
+
+// Notifications
+function markNotifRead(id){
+  const n = data.notifications.find(x => x.id === id)
+  if(n){n.read=true;saveData(data);showPage(currentPage)}
+}
+
+function markAllRead(){
+  data.notifications.forEach(n => {if(n.target === 'all' || n.target === session.id || n.target === 'role:'+session.role) n.read=true})
+  saveData(data);showPage(currentPage)
+}
+
+function clearNotifs(){
+  data.notifications = data.notifications.filter(n => n.target !== 'all' && n.target !== session.id && n.target !== 'role:'+session.role)
+  saveData(data);showPage(currentPage)
+}
+
+// Employee management
+function showEmployeeModal(empId){
+  const isEdit = !!empId
+  const e = isEdit ? data.employees.find(x => x.id === empId) : null
+  const roleOpts = ['super_admin','admin','manager','employee'].map(r => `<option value="${r}" ${e&&e.role===r?'selected':''}>${roleNames[r]}</option>`).join('')
+  showModal(`
+    <h2>${isEdit ? 'edit employee' : 'add employee'}</h2>
+    <div class="form-group"><label>name</label><input id="emp-name" value="${e?e.name:''}"></div>
+    <div class="form-group"><label>username</label><input id="emp-username" value="${e?e.username:''}"></div>
+    <div class="form-group"><label>email</label><input id="emp-email" value="${e?e.email:''}"></div>
+    <div class="form-group"><label>password</label><input id="emp-pass" value="" placeholder="${isEdit?'(leave blank to keep)':'required'}"></div>
+    <div class="form-group"><label>role</label><select id="emp-role">${roleOpts}</select></div>
+    <div class="form-group"><label>phone</label><input id="emp-phone" value="${e?e.phone||'':''}"></div>
+    ${isEdit ? `<div class="form-group"><label>active</label><select id="emp-active"><option value="true" ${e&&e.active?'selected':''}>active</option><option value="false" ${e&&!e.active?'selected':''}>inactive</option></select></div>` : ''}
+    <div style="display:flex;gap:8px;margin-top:16px">
+      <button class="btn" onclick="${isEdit ? 'saveEmployee('+empId+')' : 'createEmployee()'}">${isEdit ? 'save' : 'create'}</button>
+      <button class="btn btn-outline" onclick="hideModal()">cancel</button>
+    </div>
+  `)
+}
+
+function createEmployee(){
+  const name = document.getElementById('emp-name').value.trim()
+  const username = document.getElementById('emp-username').value.trim()
+  const email = document.getElementById('emp-email').value.trim()
+  const password = document.getElementById('emp-pass').value.trim()
+  const role = document.getElementById('emp-role').value
+  const phone = document.getElementById('emp-phone').value.trim()
+  if(!name || !username || !email || !password) return
+  if(data.users.find(u => u.username === username)){alert('username already exists');return}
+  const id = data.nextId++
+  data.users.push({id, username, password, role, name, email})
+  data.employees.push({id, username, name, email, role, active:true, joined:new Date().toISOString().slice(0,10), phone})
+  addLog(session.name+' added employee: '+name)
+  saveData(data);hideModal();showPage(currentPage)
+}
+
+function editEmployee(id){
+  showEmployeeModal(id)
+}
+
+function saveEmployee(id){
+  const e = data.employees.find(x => x.id === id)
+  const u = data.users.find(x => x.id === id)
+  if(!e || !u) return
+  e.name = document.getElementById('emp-name').value.trim()
+  e.username = document.getElementById('emp-username').value.trim()
+  e.email = document.getElementById('emp-email').value.trim()
+  e.role = document.getElementById('emp-role').value
+  e.phone = document.getElementById('emp-phone').value.trim()
+  e.active = document.getElementById('emp-active').value === 'true'
+  u.name = e.name
+  u.username = e.username
+  u.email = e.email
+  u.role = e.role
+  const pass = document.getElementById('emp-pass').value.trim()
+  if(pass) u.password = pass
+  u.active = e.active
+  addLog(session.name+' updated employee: '+e.name)
+  saveData(data);hideModal();showPage(currentPage)
+}
+
+function addLog(msg){
+  if(!data.logs) data.logs = []
+  data.logs.push(new Date().toISOString().slice(0,19)+' | '+msg)
+}
+
+function exportData(){
+  const blob = new Blob([JSON.stringify(data,null,2)],{type:'application/json'})
+  const a = document.createElement('a')
+  a.href = URL.createObjectURL(blob)
+  a.download = 'laiton-manager-export.json'
+  a.click()
+}
+
+// ===== INIT =====
+document.addEventListener('DOMContentLoaded', () => {
+  // Try auto-login
+  const saved = getSession()
+  if(saved){
+    data = initData()
+    const u = data.users.find(x => x.id === saved.id)
+    if(u){
+      session = {id:u.id, username:u.username, name:u.name, role:u.role}
+      renderApp()
+    }
+  }
+  
+  // Login
+  document.getElementById('login-btn').addEventListener('click', () => {
+    const user = document.getElementById('login-user').value.trim()
+    const pass = document.getElementById('login-pass').value
+    if(login(user, pass)){
+      document.getElementById('login-error').style.display = 'none'
+    } else {
+      document.getElementById('login-error').style.display = 'block'
+    }
+  })
+  document.getElementById('login-user').addEventListener('keydown', e => {if(e.key==='Enter')document.getElementById('login-pass').focus()})
+  document.getElementById('login-pass').addEventListener('keydown', e => {if(e.key==='Enter')document.getElementById('login-btn').click()})
+  
+  // Mobile sidebar toggle
+  document.getElementById('page-title').addEventListener('click', () => {
+    const sb = document.getElementById('sidebar')
+    sb.classList.toggle('s')
+  })
+})
+</script>
+</body>
+</html>

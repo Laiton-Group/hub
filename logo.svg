@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 100">
+  <style>text{font-family:'IBM Plex Mono',monospace;font-weight:500}</style>
+  <polygon points="20,50 35,35 65,35 80,50 65,65 35,65" fill="#a0a5b1" stroke="#1a1a1a" stroke-width="1.5"/>
+  <polygon points="30,50 40,40 60,40 70,50 60,60 40,60" fill="#1a1a1a"/>
+  <text x="100" y="62" font-size="42" letter-spacing="8" fill="#1a1a1a">LAITON</text>
+  <text x="104" y="85" font-size="12" letter-spacing="6" fill="rgba(0,0,0,.35)" text-transform="uppercase">ecosystem</text>
+</svg>
