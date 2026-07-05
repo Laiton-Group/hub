@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>⬡ LAITON · SNAKE</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0a0a10;font-family:'IBM Plex Mono',monospace;color:#c8d0e0;display:flex;justify-content:center;align-items:center;min-height:100vh;overflow:hidden;flex-direction:column}
+#wrap{text-align:center;position:relative}
+#wrap h1{font-size:10px;font-weight:300;letter-spacing:6px;color:rgba(255,255,255,.04);margin-bottom:16px;text-transform:uppercase}
+#wrap h1 span{color:rgba(0,212,170,.1)}
+canvas{border:1px solid rgba(255,255,255,.02);border-radius:2px;background:rgba(255,255,255,.005);display:block;margin:0 auto}
+#info{display:flex;justify-content:center;gap:32px;margin-top:12px;font-size:8px;letter-spacing:2px;color:rgba(255,255,255,.06)}
+#info .v{color:rgba(255,255,255,.15)}
+#info .l{color:rgba(255,255,255,.03)}
+#overlay{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:rgba(255,255,255,.02);font-size:7px;letter-spacing:4px;pointer-events:none;text-transform:uppercase;transition:.3s}
+#overlay.show{color:rgba(255,255,255,.06)}
+footer{position:fixed;bottom:24px;font-size:6px;color:rgba(255,255,255,.02);letter-spacing:3px}
+</style>
+</head>
+<body>
+<div id="wrap">
+  <h1>⬡ <span>LAITON</span> · snake</h1>
+  <canvas id="c" width="400" height="400"></canvas>
+  <div id="overlay">press any key to start</div>
+  <div id="info">
+    <div><span class="l">score</span> <span class="v" id="score">0</span></div>
+    <div><span class="l">high</span> <span class="v" id="high">0</span></div>
+    <div><span class="l">length</span> <span class="v" id="len">3</span></div>
+  </div>
+</div>
+<footer>⬡ arrows to move · space to restart</footer>
+<script>
+const SZ=20,COLS=20,ROWS=20;
+const c=document.getElementById('c'),ctx=c.getContext('2d');
+let snake=[{x:10,y:10}],food={x:15,y:10},dir={x:1,y:0},nextDir={x:1,y:0};
+let score=0,high=parseInt(localStorage.getItem('snake-high')||'0');
+let running=false,dead=false,loop;
+document.getElementById('high').textContent=high;
+
+function placeFood(){
+  let p;
+  do{p={x:Math.floor(Math.random()*COLS),y:Math.floor(Math.random()*ROWS)}}
+  while(snake.some(s=>s.x===p.x&&s.y===p.y));
+  food=p;
+}
+
+function reset(){
+  snake=[{x:10,y:10}];dir={x:1,y:0};nextDir={x:1,y:0};
+  score=0;dead=false;
+  document.getElementById('score').textContent='0';
+  document.getElementById('len').textContent='1';
+  placeFood();
+}
+
+function step(){
+  if(dead)return;
+  dir={...nextDir};
+  const head={x:snake[0].x+dir.x,y:snake[0].y+dir.y};
+  if(head.x<0||head.x>=COLS||head.y<0||head.y>=ROWS||snake.some(s=>s.x===head.x&&s.y===head.y)){
+    dead=true;
+    if(score>high){high=score;localStorage.setItem('snake-high',high);document.getElementById('high').textContent=high}
+    return;
+  }
+  snake.unshift(head);
+  if(head.x===food.x&&head.y===food.y){score+=10;placeFood();document.getElementById('score').textContent=score;document.getElementById('len').textContent=snake.length}
+  else snake.pop();
+}
+
+function draw(){
+  ctx.fillStyle='rgba(255,255,255,.005)';ctx.fillRect(0,0,400,400);
+  // Grid
+  ctx.strokeStyle='rgba(255,255,255,.005)';ctx.lineWidth=.5;
+  for(let i=0;i<=COLS;i++){ctx.beginPath();ctx.moveTo(i*SZ,0);ctx.lineTo(i*SZ,400);ctx.stroke()}
+  for(let i=0;i<=ROWS;i++){ctx.beginPath();ctx.moveTo(0,i*SZ);ctx.lineTo(400,i*SZ);ctx.stroke()}
+  // Food
+  const gl=0.3+0.2*Math.sin(Date.now()/300);
+  ctx.fillStyle=`rgba(0,212,170,${gl})`;ctx.fillRect(food.x*SZ+2,food.y*SZ+2,SZ-4,SZ-4);
+  // Snake
+  snake.forEach((s,i)=>{
+    const br=i===0?1:0.2+0.6*(1-i/snake.length);
+    ctx.fillStyle=`rgba(0,212,170,${br})`;
+    const pad=i===0?1:2;
+    ctx.fillRect(s.x*SZ+pad,s.y*SZ+pad,SZ-pad*2,SZ-pad*2);
+  });
+  // Death overlay
+  if(dead){
+    ctx.fillStyle='rgba(0,0,0,0.3)';ctx.fillRect(0,0,400,400);
+    ctx.fillStyle='rgba(255,255,255,.03)';ctx.font='10px IBM Plex Mono,monospace';ctx.textAlign='center';
+    ctx.fillText('game over',200,200);
+  }
+}
+
+function tick(){
+  step();draw();
+  if(!dead)loop=setTimeout(tick,150);
+  else loop=setTimeout(tick,150);
+}
+
+document.addEventListener('keydown',e=>{
+  if(e.key===' '){e.preventDefault();if(dead||!running){reset();if(!running){running=true;tick()}}return}
+  if(!running)return;
+  if(e.key==='ArrowUp'&&dir.y!==1)nextDir={x:0,y:-1}
+  else if(e.key==='ArrowDown'&&dir.y!==-1)nextDir={x:0,y:1}
+  else if(e.key==='ArrowLeft'&&dir.x!==1)nextDir={x:-1,y:0}
+  else if(e.key==='ArrowRight'&&dir.x!==-1)nextDir={x:1,y:0}
+  e.preventDefault();
+});
+
+document.addEventListener('keypress',e=>{if(!running&&e.key!==' '){reset();running=true;tick()}});
+reset();
+document.getElementById('overlay').classList.add('show');
+</script>
+</body>
+</html>
