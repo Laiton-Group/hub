@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>LAITON-GROUP · hub</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;400;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#07070d;color:rgba(255,255,255,.8);font-family:'Inter',sans-serif;min-height:100vh;overflow-x:hidden}
+header{padding:60px 40px 20px;max-width:800px;margin:0 auto}
+h1{font-size:11px;font-weight:400;letter-spacing:6px;text-transform:uppercase;color:rgba(255,255,255,.08);margin-bottom:4px}
+h1 span{color:#00d4aa}
+p{font-size:9px;letter-spacing:2px;color:rgba(255,255,255,.06);margin-bottom:40px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:8px;max-width:800px;margin:0 auto;padding:0 40px 60px}
+.card{background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.04);border-radius:4px;padding:20px;transition:.3s;text-decoration:none;color:rgba(255,255,255,.6);position:relative;overflow:hidden}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(0,212,170,.2),transparent);opacity:0;transition:.3s}
+.card:hover{background:rgba(255,255,255,.04);border-color:rgba(255,255,255,.08);color:rgba(255,255,255,.9)}
+.card:hover::before{opacity:1}
+.card .t{font-size:13px;font-weight:400;letter-spacing:1px;margin-bottom:6px}
+.card .d{font-size:8px;color:rgba(255,255,255,.2);letter-spacing:1px;line-height:1.6}
+.card .tag{display:inline-block;font-size:6px;letter-spacing:2px;text-transform:uppercase;padding:2px 6px;border-radius:2px;margin-top:10px;border:1px solid rgba(255,255,255,.06);color:rgba(255,255,255,.15)}
+.footer{text-align:center;padding:40px;font-size:7px;letter-spacing:2px;color:rgba(255,255,255,.04)}
+</style>
+</head>
+<body>
+<header>
+  <h1><span>⬡</span> LAITON-GROUP</h1>
+  <p>ecosystem · projects · experiments</p>
+</header>
+<div class="grid">
+  <a class="card" href="https://laiton-group.github.io/deep/" target="_blank">
+    <div class="t">DEEP</div>
+    <div class="d">3D geometric exploration · WASD + mouse look · 8 zones · 12 secrets</div>
+    <span class="tag">Three.js</span>
+  </a>
+  <a class="card" href="https://laiton-group.github.io/peersync-web/" target="_blank">
+    <div class="t">PEERSYNC WEB</div>
+    <div class="d">Web chat client · multiple channels · dark/light theme</div>
+    <span class="tag">web app</span>
+  </a>
+  <a class="card" href="https://laiton-group.github.io/terminal-games/" target="_blank">
+    <div class="t">TERMINAL GAMES</div>
+    <div class="d">Snake, Asteroids & more · playable in browser</div>
+    <span class="tag">games</span>
+  </a>
+  <a class="card" href="https://laiton.neocities.org/lab" target="_blank">
+    <div class="t">IGLOO v2</div>
+    <div class="d">3D igloo experience · loading ASCII · particles · music · inspired by igloo.inc</div>
+    <span class="tag">Neocities</span>
+  </a>
+  <a class="card" href="https://laiton.neocities.org/void" target="_blank">
+    <div class="t">VOID</div>
+    <div class="d">7 rooms · 18 secrets · atmospheric exploration · minimap</div>
+    <span class="tag">Neocities</span>
+  </a>
+  <a class="card" href="https://laiton.neocities.org/igloo" target="_blank">
+    <div class="t">IGLOO CLASSIC</div>
+    <div class="d">White 3D nodes · interactive web · original version</div>
+    <span class="tag">Neocities</span>
+  </a>
+  <a class="card" href="https://laiton.neocities.org/game" target="_blank">
+    <div class="t">ASTEROIDS</div>
+    <div class="d">Classic arcade · canvas-based</div>
+    <span class="tag">Neocities</span>
+  </a>
+  <a class="card" href="https://laiton.neocities.org" target="_blank">
+    <div class="t">NEOCITIES HOME</div>
+    <div class="d">120-node 3D network · three.js · mouse tracking</div>
+    <span class="tag">Neocities</span>
+  </a>
+  <a class="card" href="https://github.com/Laiton-Group" target="_blank">
+    <div class="t">GITHUB · LAITON-GROUP</div>
+    <div class="d">All repos · source code · projects</div>
+    <span class="tag">GitHub</span>
+  </a>
+  <a class="card" href="https://serverirc2-production.up.railway.app/health" target="_blank">
+    <div class="t">RAILWAY · API</div>
+    <div class="d">Server status · chat API · email collection endpoint</div>
+    <span class="tag">backend</span>
+  </a>
+</div>
+<div class="footer">⬡ 2026 · laitongroup</div>
+</body>
+</html>
