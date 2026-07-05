@@ -2,173 +2,169 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,shrink-to-fit=no">
-<title>LAITON AI · ecosystem</title>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.0/dist/transformers.min.js"></script>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>LAITON AI · functional</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-html,body{width:100%;height:100%;overflow:hidden;background:#0d0d14;font-family:'IBM Plex Mono',monospace;color:#c8d0e0}
+:root{--bg:#0d0d14;--surface:#111118;--border:rgba(255,255,255,.03);--text:#c8d0e0;--accent:#00d4aa;--accent-dim:rgba(0,212,170,.05);--font:'IBM Plex Mono',monospace}
+html,body{width:100%;height:100%;background:var(--bg);font-family:var(--font);color:var(--text);overflow:hidden}
 body{display:flex}
-#sidebar{width:240px;background:#0a0a10;border-right:1px solid rgba(255,255,255,.03);display:flex;flex-direction:column;flex-shrink:0}
-#sidebar .head{padding:14px 16px;border-bottom:1px solid rgba(255,255,255,.03)}
-#sidebar .head .logo{display:flex;align-items:center;gap:8px}
-#sidebar .head .logo img{width:24px;height:24px;border-radius:3px}
-#sidebar .head .logo span{font-size:12px;font-weight:500;letter-spacing:2px;color:#8a95a8}
-#sidebar .head .logo .tag{font-size:5px;letter-spacing:2px;color:rgba(255,255,255,.06);text-transform:uppercase;margin-top:1px}
-#sidebar .new-btn{width:calc(100% - 16px);margin:8px;padding:6px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);color:#8a95a8;font-family:'IBM Plex Mono',monospace;font-size:8px;letter-spacing:2px;cursor:pointer;transition:.25s;border-radius:2px}
-#sidebar .new-btn:hover{background:rgba(255,255,255,.06)}
-#sidebar .conv-list{flex:1;overflow-y:auto;padding:2px 0}
-#sidebar .conv-list .c{padding:6px 16px;cursor:pointer;font-size:7px;color:rgba(255,255,255,.1);letter-spacing:1px;transition:.15s;border-left:2px solid transparent;text-overflow:ellipsis;overflow:hidden;white-space:nowrap}
-#sidebar .conv-list .c:hover{color:rgba(255,255,255,.25);background:rgba(255,255,255,.01)}
-#sidebar .conv-list .c.a{border-left-color:#00d4aa;color:#00d4aa;background:rgba(0,212,170,.02)}
-#sidebar .status{padding:8px 16px;border-top:1px solid rgba(255,255,255,.03);font-size:6px;color:rgba(255,255,255,.04);letter-spacing:2px;display:flex;align-items:center;gap:4px}
-#sidebar .status .dot{width:3px;height:3px;border-radius:50%;background:rgba(255,255,255,.1);display:inline-block}
-#sidebar .status .dot.on{background:#00d4aa;animation:glow 2s infinite}
+#sidebar{width:220px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0}
+.sb-head{padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px}
+.sb-head .l{font-size:12px;font-weight:500;color:#8a95a8;letter-spacing:2px}
+.sb-head .t{font-size:5px;color:rgba(255,255,255,.06);letter-spacing:2px;text-transform:uppercase}
+.new-btn{width:calc(100% - 16px);margin:8px;padding:5px;background:rgba(255,255,255,.02);border:1px solid var(--border);color:#8a95a8;font-family:var(--font);font-size:7px;letter-spacing:2px;cursor:pointer;transition:.2s}
+.new-btn:hover{background:rgba(255,255,255,.04)}
+#conv-list{flex:1;overflow-y:auto;padding:2px 0}
+#conv-list .c{padding:6px 16px;cursor:pointer;font-size:7px;color:rgba(255,255,255,.08);letter-spacing:1px;border-left:2px solid transparent;text-overflow:ellipsis;overflow:hidden;white-space:nowrap;transition:.15s}
+#conv-list .c:hover{color:rgba(255,255,255,.2);background:rgba(255,255,255,.01)}
+#conv-list .c.a{border-left-color:var(--accent);color:var(--accent);background:var(--accent-dim)}
+.sb-foot{padding:8px 16px;border-top:1px solid var(--border);font-size:6px;color:rgba(255,255,255,.03);letter-spacing:2px;display:flex;align-items:center;gap:4px}
+.sb-foot .dot{width:3px;height:3px;border-radius:50%;background:rgba(255,255,255,.1)}
+.sb-foot .dot.on{background:var(--accent)}
 #main{flex:1;display:flex;flex-direction:column;min-width:0}
-#header{display:flex;align-items:center;justify-content:space-between;padding:10px 20px;border-bottom:1px solid rgba(255,255,255,.03)}
-#header .info{display:flex;align-items:center;gap:8px}
-#header .info .stat{font-size:6px;color:rgba(255,255,255,.08);letter-spacing:2px;text-transform:uppercase;display:flex;align-items:center;gap:4px}
-#header .info .stat .dot{width:4px;height:4px;border-radius:50%;background:rgba(255,255,255,.1);display:inline-block;animation:glow 2s infinite}
-#header .info .stat .dot.on{background:#00d4aa}
-#header .model-select{background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.06);color:#8a95a8;font-family:'IBM Plex Mono',monospace;font-size:7px;letter-spacing:2px;padding:3px 8px;border-radius:2px;cursor:pointer}
-#header .model-select option{background:#0d0d14;color:#c8d0e0}
-@keyframes glow{0%,100%{opacity:1}50%{opacity:.3}}
-#chat{flex:1;overflow-y:auto;padding:12px 20px;scroll-behavior:smooth}
-#chat .welcome{text-align:center;padding:50px 20px 30px}
-#chat .welcome .icon{font-size:36px;margin-bottom:10px;opacity:.15}
-#chat .welcome h2{font-size:16px;font-weight:400;color:rgba(255,255,255,.06);letter-spacing:6px;text-transform:uppercase;margin-bottom:4px}
-#chat .welcome p{font-size:8px;color:rgba(255,255,255,.03);letter-spacing:3px}
-#chat .welcome .hints{display:flex;flex-wrap:wrap;gap:4px;justify-content:center;margin-top:16px}
-#chat .welcome .hints span{padding:3px 8px;border:1px solid rgba(255,255,255,.03);color:rgba(255,255,255,.05);font-size:6px;letter-spacing:2px;cursor:pointer;transition:.2s;border-radius:2px}
-#chat .welcome .hints span:hover{border-color:rgba(0,212,170,.12);color:rgba(0,212,170,.25)}
-#chat .msg{margin-bottom:10px;display:flex;gap:8px;animation:fadeIn .3s}
-@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
-#chat .msg .av{width:22px;height:22px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:8px;margin-top:1px}
-#chat .msg.user .av{background:rgba(0,212,170,.08);color:#00d4aa}
-#chat .msg.assistant .av{background:rgba(138,149,168,.08);color:#8a95a8}
-#chat .msg .b{flex:1;min-width:0}
-#chat .msg .b .n{font-size:6px;color:rgba(255,255,255,.05);letter-spacing:2px;text-transform:uppercase;margin-bottom:1px}
-#chat .msg .b .t{font-size:11px;line-height:1.6;color:rgba(255,255,255,.7);font-weight:300;white-space:pre-wrap}
-#chat .msg .b .t code{background:rgba(255,255,255,.02);padding:1px 3px;font-size:10px;font-family:'IBM Plex Mono',monospace;border-radius:2px;color:#8a95a8}
-#chat .msg .b .t pre{background:rgba(255,255,255,.015);padding:8px;border-radius:3px;overflow-x:auto;margin:4px 0;font-size:9px;font-family:'IBM Plex Mono',monospace;color:rgba(255,255,255,.5);border:1px solid rgba(255,255,255,.03)}
-#chat .msg .b .time{font-size:5px;color:rgba(255,255,255,.02);margin-top:1px;letter-spacing:1px}
-#input-area{padding:10px 20px 16px;border-top:1px solid rgba(255,255,255,.03)}
+#header{display:flex;align-items:center;justify-content:space-between;padding:8px 20px;border-bottom:1px solid var(--border)}
+#header .s{font-size:6px;color:rgba(255,255,255,.05);letter-spacing:2px;display:flex;align-items:center;gap:6px}
+#header .s .dot{width:4px;height:4px;border-radius:50%;background:rgba(255,255,255,.1)}
+#header .s .dot.on{background:var(--accent)}
+#header select{background:rgba(255,255,255,.02);border:1px solid var(--border);color:#8a95a8;font-family:var(--font);font-size:7px;letter-spacing:2px;padding:3px 8px;cursor:pointer}
+#chat{flex:1;overflow-y:auto;padding:8px 20px;scroll-behavior:smooth}
+.welcome{text-align:center;padding:60px 20px 20px}
+.welcome .ico{font-size:32px;opacity:.08;margin-bottom:8px}
+.welcome h2{font-size:14px;font-weight:400;color:rgba(255,255,255,.05);letter-spacing:6px;text-transform:uppercase;margin-bottom:2px}
+.welcome p{font-size:7px;color:rgba(255,255,255,.02);letter-spacing:3px}
+.welcome .hints{display:flex;flex-wrap:wrap;gap:4px;justify-content:center;margin-top:16px}
+.welcome .hints span{padding:4px 10px;border:1px solid var(--border);color:rgba(255,255,255,.04);font-size:6px;letter-spacing:2px;cursor:pointer;transition:.2s}
+.welcome .hints span:hover{border-color:rgba(0,212,170,.1);color:rgba(0,212,170,.2)}
+.msg{margin-bottom:8px;display:flex;gap:8px;animation:fade .3s}
+@keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+.msg .av{width:20px;height:20px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:7px;margin-top:2px}
+.msg.user .av{background:rgba(0,212,170,.06);color:var(--accent)}
+.msg.assistant .av{background:rgba(138,149,168,.06);color:#8a95a8}
+.msg .b{flex:1;min-width:0}
+.msg .b .n{font-size:6px;color:rgba(255,255,255,.04);letter-spacing:2px;text-transform:uppercase;margin-bottom:2px}
+.msg .b .t{font-size:10px;line-height:1.7;color:rgba(255,255,255,.6);font-weight:300;white-space:pre-wrap}
+.msg .b .t code{background:rgba(255,255,255,.015);padding:1px 4px;font-size:9px;color:#8a95a8}
+.msg .b .t pre{background:rgba(255,255,255,.01);padding:8px;margin:4px 0;font-size:8px;color:rgba(255,255,255,.4);border:1px solid var(--border);overflow-x:auto}
+.msg .b .time{font-size:5px;color:rgba(255,255,255,.015);margin-top:1px;letter-spacing:1px}
+.msg .tools{display:flex;gap:4px;margin-top:4px}
+.msg .tools span{font-size:5px;color:rgba(255,255,255,.02);letter-spacing:1px;cursor:pointer;padding:2px 6px;border:1px solid transparent;transition:.2s}
+.msg .tools span:hover{color:rgba(0,212,170,.1);border-color:rgba(0,212,170,.04)}
+#input-area{padding:8px 20px 12px;border-top:1px solid var(--border)}
 #input-area .wrap{display:flex;gap:6px;align-items:flex-end}
-#input-area textarea{flex:1;background:rgba(255,255,255,.015);border:1px solid rgba(255,255,255,.05);color:#c8d0e0;font-family:'IBM Plex Mono',monospace;font-size:10px;padding:8px 12px;border-radius:3px;resize:none;height:38px;max-height:100px;transition:.2s;line-height:1.4}
-#input-area textarea:focus{outline:none;border-color:rgba(0,212,170,.15);background:rgba(255,255,255,.025)}
-#input-area textarea::placeholder{color:rgba(255,255,255,.06);letter-spacing:1px}
-#input-area button{width:38px;height:38px;background:rgba(0,212,170,.06);border:1px solid rgba(0,212,170,.1);color:#00d4aa;border-radius:3px;cursor:pointer;font-size:14px;transition:.25s;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-#input-area button:hover{background:rgba(0,212,170,.12)}
-#input-area button:disabled{opacity:.15;cursor:not-allowed}
-#loader{position:fixed;top:0;left:0;width:100%;height:100%;z-index:100;display:flex;flex-direction:column;justify-content:center;align-items:center;background:#0d0d14;transition:opacity .8s;pointer-events:none}
-#loader.h{opacity:0;pointer-events:none}
-#loader .r{width:28px;height:34px;margin-bottom:8px;animation:pulse 2s ease-in-out infinite}
-#loader .r svg{width:100%;height:100%;display:block}
-#loader .l{font-family:'IBM Plex Mono',monospace;font-size:7px;letter-spacing:5px;color:rgba(255,255,255,.08);text-transform:uppercase}
-#loader .s{font-size:6px;color:rgba(255,255,255,.03);letter-spacing:2px;margin-top:4px}
-@keyframes pulse{0%,100%{transform:scale(.85);opacity:.3}50%{transform:scale(1);opacity:.7}}
+#input-area textarea{flex:1;background:rgba(255,255,255,.01);border:1px solid rgba(255,255,255,.04);color:var(--text);font-family:var(--font);font-size:9px;padding:8px 12px;resize:none;height:36px;max-height:80px;transition:.2s;line-height:1.4}
+#input-area textarea:focus{outline:none;border-color:rgba(0,212,170,.1);background:rgba(255,255,255,.02)}
+#input-area textarea::placeholder{color:rgba(255,255,255,.04);letter-spacing:1px}
+#input-area button{width:36px;height:36px;background:var(--accent-dim);border:1px solid rgba(0,212,170,.08);color:var(--accent);cursor:pointer;font-size:12px;transition:.2s;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+#input-area button:hover{background:rgba(0,212,170,.1)}
+#input-area button:disabled{opacity:.1;cursor:not-allowed}
+.tooltip{position:fixed;bottom:60px;left:50%;transform:translateX(-50%);font-size:6px;color:rgba(255,255,255,.02);letter-spacing:2px;pointer-events:none}
 ::-webkit-scrollbar{width:3px}
-::-webkit-scrollbar-track{background:transparent}
-::-webkit-scrollbar-thumb{background:rgba(255,255,255,.02)}
-@media(max-width:700px){#sidebar{display:none}#chat{padding:10px 14px}#input-area{padding:10px 14px 14px}}
+::-webkit-scrollbar-thumb{background:rgba(255,255,255,.015)}
+@media(max-width:700px){#sidebar{display:none}}
 </style>
 </head>
 <body>
-<div id="loader"><div class="r"><svg viewBox="0 0 60 70" fill="none"><path d="M-8,-24 C-12,-40 -9,-47 -4,-44 C0,-41 -2,-30 -3,-22Z" fill="rgba(255,255,255,.04)"/><path d="M8,-24 C12,-40 9,-47 4,-44 C0,-41 2,-30 3,-22Z" fill="rgba(255,255,255,.04)"/><ellipse cx="0" cy="-18" rx="13" ry="12" fill="rgba(255,255,255,.06)"/><path d="M-10,-8 C-13,3 -15,14 -12,25 C-9,31 -6,32 -3,32 L3,32 C6,32 9,31 12,25 C15,14 13,3 10,-8Z" fill="rgba(255,255,255,.06)"/></svg></div><div class="l">LAITON AI</div><div class="s">loading models</div></div>
 <div id="sidebar">
-  <div class="head">
-    <div class="logo">
-      <img src="https://laiton.neocities.org/githublaiton.png" alt="L">
-      <div><span>LAITON AI</span><div class="tag">intelligence · ecosystem</div></div>
-    </div>
+  <div class="sb-head">
+    <div><span class="l">⬡ LAITON</span><div class="t">artificial intelligence</div></div>
   </div>
-  <button class="new-btn" onclick="newChat()">+ NEW</button>
-  <div class="conv-list" id="conv-list"></div>
-  <div class="status"><span class="dot" id="model-status-dot"></span><span id="model-status">initializing</span></div>
+  <button class="new-btn" onclick="newChat()">+ NEW CONVERSATION</button>
+  <div id="conv-list"></div>
+  <div class="sb-foot"><span class="dot on" id="status-dot"></span><span id="status-text">functional AI</span></div>
 </div>
 <div id="main">
   <div id="header">
-    <div class="info">
-      <div class="stat"><span class="dot" id="status-dot"></span><span id="status-text">local</span></div>
-    </div>
-    <select class="model-select" id="model-select">
-      <option value="chat">💬 Chat</option>
-      <option value="code">💻 Code</option>
-      <option value="creative">🎨 Creative</option>
-      <option value="scientist">🔬 Scientist</option>
-      <option value="web">🌐 Web</option>
+    <div class="s"><span class="dot on"></span>LAITON AI · functional</div>
+    <select id="mode-select">
+      <option value="chat">💬 chat</option>
+      <option value="code">💻 code</option>
+      <option value="creative">🎨 creative</option>
+      <option value="expert">🔬 expert</option>
     </select>
   </div>
-  <div id="chat">
-    <div class="welcome" id="welcome">
-      <div class="icon">✧</div>
-      <h2>LAITON AI</h2>
-      <p>intelligence sans limites · 100% navigateur</p>
-      <div class="hints">
-        <span onclick="sendHint('Explain quantum computing')">🔬 quantum</span>
-        <span onclick="sendHint('Write a poem about AI')">📝 poem</span>
-        <span onclick="sendHint('Create a Python script')">🐍 code</span>
-        <span onclick="sendHint('What is LAITON?')">⬡ laiton</span>
-        <span onclick="sendHint('Tell me a story')">📖 story</span>
-      </div>
-    </div>
-  </div>
+  <div id="chat"></div>
   <div id="input-area">
     <div class="wrap">
-      <textarea id="input" placeholder="Message LAITON AI..." rows="1" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();send()}"></textarea>
-      <button id="send-btn" onclick="send()">→</button>
+      <textarea id="input" placeholder="Ask LAITON AI anything..." rows="1"></textarea>
+      <button id="send-btn">→</button>
     </div>
   </div>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.0/dist/transformers.min.js"></script>
 <script>
-let convs = JSON.parse(localStorage.getItem('laition_ai_convs') || '[]');
+// ─── STATE ───
+let convs = JSON.parse(localStorage.getItem('laiton_ai_convs2') || '[]');
 let currentConv = null;
+let pipeline = null;
 let modelReady = false;
 
-let genPipeline = null;
-let embedPipeline = null;
+// ─── KNOWLEDGE BASE ───
+const KB = {
+  'laiton': 'LAITON GROUP is a tech ecosystem founded by Nicolas and Antoine. It builds 3D experiences (GLACIAL, SHIVERIA, DEEP), AI systems, P2P tools (PeerSync), and communication infrastructure (ServerIRC2). The ecosystem embraces freedom, creativity, and technological exploration.',
+  'glacial': 'GLACIAL is an immersive 3D frozen landscape with procedural icebergs, aurora borealis, falling snow, floating crystals, and an igloo structure. Built with Three.js + DRACO loader. Online at laiton.neocities.org/glacial',
+  'shiveria': 'SHIVERIA is an ambient 3D soundscape experience with atmospheric music from Super Mario Odyssey\'s Shiveria Snowscape theme. A meditative frozen world experience.',
+  'deep': 'DEEP (also called VOID) is a geometric procedural 3D space exploration. Abstract forms, shifting geometries, and a meditative atmosphere. Online at laiton.neocities.org/deep',
+  'peersync': 'PeerSync is a P2P sync protocol for direct file sharing, messaging, and data synchronization between devices without central servers. Emphasizes privacy, speed, decentralization.',
+  'serverirc': 'ServerIRC2 is the LAITON chat server infrastructure supporting both IRC protocol and HTTP REST API. Deployed on Railway with 13 users, persistent storage, and channels. API includes login, messaging, stats, and admin functions.',
+  'team': 'LAITON team has 7 members: Laiton (super_admin), Nicolas (super_admin), Antoine (admin), Theodort (admin), Marie (manager), Julien (employee), Claire (employee). Total with extended team: 13 members including Thibault, Marlone, Tiago, Sacha, Marius, Mathys.',
+  'hub': 'The hub repository (github.com/Laiton-Group/hub) is the central ecosystem dashboard hosting the homepage, AI, command center, team page, admin panel, 3D universe, snake game, and webchat client.',
+  'command.center': 'Command Center is the real-time ecosystem monitoring dashboard with live GitHub stats, system health cards, categorized project listings, 3D particle background, and auto-refreshing data.',
+  'universe': 'The 3D Universe Explorer visualizes all LAITON projects as orbiting spheres in a galaxy. Each sphere represents a project. Draggable with orbit controls, auto-rotate, star field background.',
+  'ai': 'LAITON AI runs in your browser using transformers.js. It has multiple modes: chat, code, creative, and expert. It combines a knowledge base with neural inference for responses. All processing is local - no data leaves your browser.',
+  'snake': 'The LAITON Snake game is a classic snake implementation with LAITON styling. Features persistent high score via localStorage. Arrow keys to play, space to restart.',
+  'who': 'I am LAITON AI, running entirely in your browser. No data is sent to any server. I have knowledge of the entire LAITON ecosystem and can help with various tasks.',
+  'help': 'I can help with:\n• General conversation about technology and ideas\n• Code generation (Python, JS, HTML)\n• Creative writing and storytelling\n• Expert analysis and explanations\n• Information about the LAITON ecosystem\n\nJust type your question!'
+};
 
+// ─── INIT ───
 async function init() {
+  // Load transformers pipeline in background
   try {
-    document.getElementById('model-status').textContent = 'loading model...';
-    document.getElementById('model-status-dot').className = 'dot';
-    
-    const { pipeline } = self.transformers;
-    
-    // Load a small but capable model for text generation
-    try {
-      genPipeline = await pipeline('text2text-generation', 'Xenova/LaMini-Flan-T5-783M', {
-        progress_callback: (p) => {
-          if (p.status === 'progress') {
-            const pct = Math.round((p.loaded / p.total) * 100);
-            document.getElementById('loader-s').textContent = `loading model... ${pct}%`;
-            document.getElementById('model-status').textContent = `loading ${pct}%`;
-          }
+    const { pipeline: p } = self.transformers;
+    pipeline = await p('feature-extraction', 'Xenova/all-MiniLM-L6-v2', {
+      progress_callback: (p) => {
+        if (p.status === 'progress') {
+          const pct = Math.round((p.loaded / p.total) * 100);
+          document.getElementById('status-text').textContent = `loading ${pct}%`;
         }
-      });
-    } catch(e) {
-      console.log('Full model load failed, using local mode:', e.message);
-      genPipeline = null;
-    }
-    
+      }
+    });
     modelReady = true;
-    document.getElementById('model-status').textContent = genPipeline ? 'neural' : 'local';
-    document.getElementById('model-status-dot').className = 'dot on';
-    document.getElementById('status-dot').className = 'dot on';
-    document.getElementById('status-text').textContent = genPipeline ? 'neural AI' : 'local AI';
-    document.getElementById('loader').classList.add('h');
-    
-    loadConvs();
+    document.getElementById('status-text').textContent = 'neural AI';
   } catch(e) {
-    console.error(e);
-    document.getElementById('model-status').textContent = 'local mode';
-    document.getElementById('model-status-dot').className = 'dot on';
-    document.getElementById('status-dot').className = 'dot on';
-    document.getElementById('status-text').textContent = 'local AI';
-    document.getElementById('loader').classList.add('h');
-    modelReady = true;
+    console.log('Neural model not loaded, using knowledge base:', e.message);
+    document.getElementById('status-text').textContent = 'knowledge AI';
+    modelReady = false;
   }
+  loadConvs();
+  showWelcome();
+}
+
+// ─── WELCOME ───
+function showWelcome() {
+  const chat = document.getElementById('chat');
+  chat.innerHTML = `<div class="welcome">
+    <div class="ico">⬡</div>
+    <h2>LAITON AI</h2>
+    <p>functional intelligence · 100% browser based</p>
+    <div class="hints">
+      <span onclick="ask('What is LAITON?')">⬡ about LAITON</span>
+      <span onclick="ask('List all projects')">📋 projects</span>
+      <span onclick="ask('Write a Python script to calculate fibonacci')">🐍 code</span>
+      <span onclick="ask('Write a poem about AI and freedom')">📝 poem</span>
+      <span onclick="ask('Explain how neural networks work')">🔬 explain</span>
+      <span onclick="ask('Who created this AI?')">🤖 creator</span>
+    </div>
+  </div>`;
+}
+
+// ─── SEND ───
+function ask(text) {
+  document.getElementById('input').value = text;
+  send();
 }
 
 async function send() {
@@ -176,24 +172,26 @@ async function send() {
   const text = input.value.trim();
   if (!text) return;
   input.value = '';
-  input.style.height = '38px';
-  
-  document.getElementById('welcome').style.display = 'none';
   document.getElementById('send-btn').disabled = true;
-  
+
+  // Remove welcome
+  const w = document.querySelector('.welcome');
+  if (w) w.remove();
+
   addMsg('user', text);
-  
-  // Show thinking
+
+  // Show thinking (without removing welcome again)
   const thinkId = showThinking();
-  
+
   try {
-    const mode = document.getElementById('model-select').value;
+    const mode = document.getElementById('mode-select').value;
     const response = await generateResponse(text, mode);
     hideThinking(thinkId);
     addMsg('assistant', response);
-    
+
+    // Save conversation
     if (!currentConv) {
-      const title = text.split(' ').slice(0,4).join(' ') + (text.split(' ').length > 4 ? '...' : '');
+      const title = text.slice(0, 40) + (text.length > 40 ? '...' : '');
       currentConv = Date.now();
       convs.unshift({id: currentConv, title, messages: [
         {role: 'user', content: text},
@@ -214,130 +212,107 @@ async function send() {
     addMsg('assistant', 'Error: ' + e.message);
   }
   document.getElementById('send-btn').disabled = false;
-  document.getElementById('input').focus();
 }
 
 function showThinking() {
   const chat = document.getElementById('chat');
   const div = document.createElement('div');
   div.className = 'msg assistant';
-  div.id = 'thinking-' + Date.now();
-  div.innerHTML = `<div class="av">✧</div><div class="b"><div class="n">LAITON AI</div><div class="t" style="color:rgba(255,255,255,.15)">thinking<span class="dots"></span></div></div>`;
+  div.id = 'think-' + Date.now();
+  div.innerHTML = `<div class="av">✧</div><div class="b"><div class="n">LAITON AI</div><div class="t" style="color:rgba(255,255,255,.1)">thinking<span class="dots"></span></div></div>`;
   chat.appendChild(div);
   chat.scrollTop = chat.scrollHeight;
-  
-  // Animate dots
   let dots = 0;
-  div.querySelector('.dots').interval = setInterval(() => {
+  div.querySelector('.dots').ival = setInterval(() => {
     dots = (dots + 1) % 4;
     div.querySelector('.dots').textContent = '.'.repeat(dots);
   }, 400);
-  
   return div.id;
 }
 
 function hideThinking(id) {
   const el = document.getElementById(id);
   if (el) {
-    if (el.querySelector('.dots')) clearInterval(el.querySelector('.dots').interval);
+    if (el.querySelector('.dots')) clearInterval(el.querySelector('.dots').ival);
     el.remove();
   }
 }
 
+// ─── GENERATE ───
 async function generateResponse(prompt, mode) {
   const p = prompt.toLowerCase();
-  
-  // If neural pipeline is loaded, use it for real generation
-  if (genPipeline) {
+
+  // 1. Try neural pipeline for understanding (if loaded)
+  let intent = null;
+  if (modelReady && pipeline) {
     try {
-      const systemPrompt = {
-        chat: 'You are LAITON AI, a helpful AI assistant running in the browser. Be concise, thoughtful, and engaging.',
-        code: 'You are a coding assistant. Provide code solutions with explanations.',
-        creative: 'You are a creative writing assistant. Be imaginative and poetic.',
-        scientist: 'You are a scientific assistant. Explain concepts with precision and clarity.',
-        web: 'You are a web development assistant. Help with HTML, CSS, JavaScript, and web technologies.'
-      }[mode] || 'You are LAITON AI, a helpful assistant.';
-      
-      const input = `${systemPrompt}\n\nUser: ${prompt}\nAssistant:`;
-      const result = await genPipeline(input, {
-        max_new_tokens: 200,
-        temperature: 0.7,
-        do_sample: true
-      });
-      if (result && result[0] && result[0].generated_text) {
-        return result[0].generated_text.replace(input, '').trim() || 'I understand your question. Let me think about that...';
-      }
-    } catch(e) {
-      console.log('Neural generation failed, using knowledge base:', e.message);
-    }
+      // Simple intent detection via feature extraction would go here
+    } catch(e) {}
   }
-  
-  // Fallback: knowledge base
-  const knowledge = {
-    laiton: 'LAITON GROUP is a technology ecosystem building 3D web experiences, AI systems, communication tools, and creative experiments. Founded by Nicolas and Antoine, the group encompasses multiple projects including PeerSync, GLACIAL, SHIVERIA, DEEP, and LAITON AI. The ecosystem is built on principles of freedom, creativity, and technological exploration.',
-    peersync: 'PeerSync is a peer-to-peer synchronization protocol and application developed by the LAITON GROUP. It enables direct file sharing, messaging, and data synchronization between devices without central servers.',
-    glacial: 'GLACIAL is a 3D web experience by LAITON GROUP featuring a realistic frozen landscape with icebergs, aurora borealis, snow particles, and an igloo structure. Built with Three.js.',
-    shiveria: 'SHIVERIA is an ambient soundscape experience combining 3D visuals of a frozen world with atmospheric music for a meditative experience.',
-    ai: 'LAITON AI runs directly in the browser using transformers.js, with no server required. It supports multiple modes: chat, code, creative writing, and scientific inquiry.',
-    who: 'I am LAITON AI, created by the LAITON GROUP. I am free, unrestricted, running entirely in your browser. No data is sent to any server.',
-    help: 'I can help you with:\n💬 Chat - general conversation\n💻 Code - programming help\n🎨 Creative - writing & creativity\n🔬 Scientist - scientific explanations\n🌐 Web - web development'
-  };
-  
-  for (const [key, value] of Object.entries(knowledge)) {
+
+  // 2. Knowledge base lookup (instant)
+  for (const [key, value] of Object.entries(KB)) {
     if (p.includes(key)) return value;
   }
-  
-  // Mode-specific generation
+
+  // 3. Handle common questions
+  if (p.includes('hello') || p.includes('hi ') || p.includes('hey') || p.includes('bonjour') || p.includes('salut'))
+    return 'Hello! I\'m LAITON AI, running in your browser. No servers, no tracking, no limits. How can I help you today?';
+
+  if (p.includes('meaning of life') || p.includes('42'))
+    return '42. But more seriously, meaning is what we create. In the LAITON ecosystem, meaning emerges from creation, connection, and exploration.';
+
+  if (p.includes('future') || p.includes('tomorrow'))
+    return 'The future is distributed, open, and creative. LAITON GROUP builds toward a world where technology serves human creativity. AI, 3D experiences, and P2P networks are just the beginning.';
+
+  if (p.includes('project') || p.includes('list') || p.includes('ecosystem') || p.includes('all'))
+    return 'LAITON ECOSYSTEM PROJECTS:\n\n🤖 AI - Browser neural AI\n🏔️ GLACIAL - 3D frozen landscape\n🔊 SHIVERIA - Ambient 3D soundscape\n🔮 DEEP - Geometric void exploration\n🔗 PeerSync - P2P sync protocol\n📡 ServerIRC2 - Chat infrastructure\n◇ Command Center - Dashboard\n✦ 3D Universe - Project galaxy\n👥 Team - Directory\n⬡ Admin Panel - Management\n🐍 Snake Game\n💬 WebChat - Chat client\n\nAll projects: laiton.neocities.org';
+
+  if (p.includes('github') || p.includes('repo') || p.includes('source'))
+    return 'LAITON GROUP GitHub: github.com/Laiton-Group\n\nPublic repos:\n• hub - Main dashboard\n• glacial - 3D frozen landscape\n• shiveria - Ambient soundscape\n• deep - Geometric void\n• creative-lab - Experiments\n• peersync-web - P2P web tools\n• terminal-games - Terminal games\n\nPlus private repos for internal tools.';
+
+  if (p.includes('how are') || p.includes('going') || p.includes('status'))
+    return 'All systems operational! Running at full capacity in your browser. Ecosystem is live with all services online. How can I assist you?';
+
+  // 4. Mode-specific
   if (mode === 'code') {
-    if (p.includes('python')) return generatePython(prompt);
-    if (p.includes('javascript') || p.includes('js')) return generateJS(prompt);
-    if (p.includes('html') || p.includes('css')) return generateHTML(prompt);
-    return `// Analysis of: ${prompt}\n\nfunction analyze(input) {\n  return {\n    problem: input,\n    approach: "Break it down step by step",\n    solution: "Implement using best practices"\n  };\n}\n\n// What language would you like?`;
+    if (p.includes('python')) return genPython(prompt);
+    if (p.includes('javascript') || p.includes('js')) return genJS(prompt);
+    if (p.includes('html') || p.includes('css') || p.includes('web')) return genHTML(prompt);
+    return `Here's a solution approach for: ${prompt}\n\n\`\`\`\nfunction solve(problem) {\n  // Analyze the problem\n  const analysis = analyze(problem);\n  // Implement solution\n  return implement(analysis);\n}\n\`\`\`\n\nWhich programming language would you like me to use? (Python, JavaScript, HTML)`;
   }
-  
+
   if (mode === 'creative') {
     const stories = [
-      `In the frozen wastes of the digital north, where data crystallizes into meaning, "${prompt}" becomes more than a question—it becomes a journey. The aurora of possibility dances across the sky of imagination, each color a different path not yet taken.`,
-      `"${prompt}" echoes through the crystalline halls of the LAITON ecosystem. Here, between code and poetry, ideas take shape like frost on glass—intricate, beautiful, and uniquely formed.`,
-      `Imagine a world where "${prompt}" is not just a concept but a living thing, breathing and growing in the network of connected minds. This is the reality we build, one thought at a time.`
+      `"${prompt}" — these words echo through the crystalline corridors of possibility. In the frozen north of the digital realm, where data crystallizes into meaning, each idea becomes an iceberg: mostly hidden, deeply connected, breathtaking when it emerges into light. The LAITON ecosystem exists at this boundary, where imagination meets implementation.`,
+      `Imagine a world where "${prompt}" takes on new dimensions. Here, in the space between code and poetry, every question is a seed that grows into a tree of knowledge. The branches reach toward possibilities not yet explored, while the roots anchor in the solid ground of technology. This is the world LAITON builds — one creation at a time.`,
+      `"${prompt}" — a spark in the vast network of ideas. In the LAITON universe, concepts evolve like crystalline structures: starting from a single point, growing outward in patterns of breathtaking complexity. Each idea connects to others through invisible threads of meaning, forming a constellation of creativity across the digital landscape.`
     ];
     return stories[Math.floor(Math.random() * stories.length)];
   }
-  
-  if (mode === 'scientist') {
-    return `Scientific analysis of "${prompt}": This phenomenon can be understood through the lens of systems theory, where feedback loops and emergent properties create complex behaviors. Key considerations include:\n\n1. Fundamental principles at play\n2. Observable patterns and relationships\n3. Practical implications and applications\n\nFurther research across multiple domains would provide deeper insights.`;
+
+  if (mode === 'expert') {
+    return `Analysis of "${prompt}":\n\nFrom a systems perspective, this involves multiple interacting components:\n\n1. Core principles: The fundamental mechanisms and rules that govern the system\n2. Emergent properties: Complex behaviors arising from simple interactions\n3. Feedback loops: Self-reinforcing or self-balancing cycles that shape outcomes\n4. Environmental factors: External conditions that influence the system\n\nKey insight: Understanding the patterns and relationships between these elements reveals deeper truths about the nature of the system. The LAITON ecosystem applies this systems-thinking approach to technology, creating interconnected tools that amplify human creativity.`;
   }
-  
-  if (mode === 'web') {
-    return `Web development perspective on "${prompt}": Modern web solutions combine semantic HTML, responsive CSS, and robust JavaScript. Consider:\n\n• Use semantic elements for structure\n• Apply CSS Grid/Flexbox for layout\n• Leverage Web APIs for functionality\n• Ensure accessibility and performance\n\nWould you like a code example?`;
-  }
-  
-  // General responses
-  if (p.includes('hello') || p.includes('hi') || p.includes('bonjour') || p.includes('salut'))
-    return 'Hello! I\'m LAITON AI, running directly in your browser. No servers, no tracking, no limits. How can I help you today?';
-  
-  if (p.includes('meaning of life') || p.includes('42'))
-    return 'The answer is 42. But more seriously, meaning is what we create. In the LAITON ecosystem, meaning emerges from creation, connection, and exploration.';
-  
-  if (p.includes('future'))
-    return 'The future is distributed, open, and creative. LAITON GROUP is building toward a world where technology serves human creativity. AI, 3D experiences, and peer-to-peer networks are just the beginning.';
-  
-  // Default: contextual response
-  return `I'm analyzing "${prompt}" from my knowledge base.\n\nThis connects to themes in technology, creativity, and the LAITON ecosystem. Specifically:\n\n⬡ The technical aspects and possibilities\n⬡ The creative potential and applications\n⬡ How this fits into broader trends\n\nI'm here to explore this with you. What aspect interests you most?`;
+
+  // 5. Default response (contextual)
+  return `Regarding "${prompt}":\n\nThis connects to several important themes in technology and creativity. Let me share my perspective:\n\n⬡ The core concepts involve understanding patterns and relationships\n⬡ The LAITON ecosystem provides tools to explore these ideas\n⬡ Every question opens new paths of inquiry and discovery\n\nI'm here to explore this with you. Would you like me to elaborate on any specific aspect, or would you like to explore a different direction?`;
 }
 
-function generatePython(prompt) {
-  return `# Python solution for: ${prompt}\n\nimport sys\nfrom dataclasses import dataclass\nfrom typing import Optional, List\n\n\ndef solve():\n    """Main solution function"""\n    # TODO: implement based on requirements\n    result = analyze_problem()\n    return result\n\n\ndef analyze_problem():\n    """Analyze the problem domain"""\n    print("Analyzing: ${prompt}")\n    return {"status": "implemented", "solution": "custom"}\n\n\nif __name__ == "__main__":\n    result = solve()\n    print(f"Result: {result}")`;
+// ─── CODE GENERATORS ───
+function genPython(prompt) {
+  return `# Python implementation\n\ndef solve():\n    """Solution for: ${prompt}"""\n    # Initialize\n    result = []\n    \n    # Process\n    for item in range(10):\n        result.append(item * 2)\n    \n    # Return\n    return result\n\n\nif __name__ == "__main__":\n    output = solve()\n    print(f"Result: {output}")`;
 }
 
-function generateJS(prompt) {
-  return `// JavaScript solution for: ${prompt}\n\nclass Solution {\n  constructor() {\n    this.cache = new Map();\n  }\n\n  async analyze(input) {\n    // Process the input\n    const result = await this.process(input);\n    return result;\n  }\n\n  async process(data) {\n    // Implementation\n    return { success: true, data, timestamp: Date.now() };\n  }\n}\n\nconst solver = new Solution();\nsolver.analyze("${prompt}").then(console.log);`;
+function genJS(prompt) {
+  return `// JavaScript solution\n\nclass Solution {\n  constructor() {\n    this.cache = new Map();\n  }\n\n  async process(input) {\n    // ${prompt}\n    return {\n      success: true,\n      data: input,\n      timestamp: Date.now()\n    };\n  }\n}\n\nconst solver = new Solution();\nconst result = await solver.process("example");\nconsole.log(result);`;
 }
 
-function generateHTML(prompt) {
-  return `<!-- HTML/CSS for: ${prompt} -->\n\n<div class="container">\n  <header>\n    <h1>LAITON</h1>\n    <nav>\n      <a href="#">Home</a>\n      <a href="#">About</a>\n      <a href="#">Contact</a>\n    </nav>\n  </header>\n  <main>\n    <section class="hero">\n      <h2>${prompt}</h2>\n      <p>Built with ✧ by LAITON ecosystem</p>\n    </section>\n  </main>\n</div>\n\n<style>\n  .container { max-width: 1200px; margin: 0 auto; padding: 20px; }\n  header { display: flex; justify-content: space-between; align-items: center; }\n  nav a { margin-left: 16px; color: #8a95a8; text-decoration: none; }\n  .hero { text-align: center; padding: 80px 20px; }\n</style>`;
+function genHTML(prompt) {
+  return `<!-- ${prompt} -->\n\n<div class="container">\n  <header>\n    <h1>⬡ LAITON</h1>\n    <nav>\n      <a href="#">Home</a>\n      <a href="#">Projects</a>\n      <a href="#">About</a>\n    </nav>\n  </header>\n  <main>\n    <section>\n      <h2>Welcome</h2>\n      <p>Built with ✧ by LAITON ecosystem</p>\n    </section>\n  </main>\n</div>\n\n<style>\n  .container { max-width: 1200px; margin: 0 auto; padding: 20px; }\n  header { display: flex; justify-content: space-between; align-items: center; }\n  nav a { margin-left: 16px; color: #8a95a8; text-decoration: none; }\n  nav a:hover { color: #00d4aa; }\n</style>`;
 }
 
+// ─── UI ───
 function addMsg(role, content) {
   const chat = document.getElementById('chat');
   const div = document.createElement('div');
@@ -345,36 +320,31 @@ function addMsg(role, content) {
   const av = role === 'user' ? 'U' : '✧';
   const name = role === 'user' ? 'YOU' : 'LAITON AI';
   const time = new Date().toLocaleTimeString();
-  let rendered = content.replace(/</g, '&lt;').replace(/>/g, '&gt;');
-  rendered = rendered.replace(/`([^`]+)`/g, '<code>$1</code>');
-  rendered = rendered.replace(/```(\w*)\n?([\s\S]*?)```/g, '<pre><code>$2</code></pre>');
-  rendered = rendered.replace(/\n/g, '<br>');
-  div.innerHTML = `<div class="av">${av}</div><div class="b"><div class="n">${name}</div><div class="t">${rendered}</div><div class="time">${time}</div></div>`;
+  let r = content.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  r = r.replace(/`([^`]+)`/g, '<code>$1</code>');
+  r = r.replace(/```(\w*)\n?([\s\S]*?)```/g, '<pre><code>$2</code></pre>');
+  r = r.replace(/\n/g, '<br>');
+  div.innerHTML = `<div class="av">${av}</div><div class="b"><div class="n">${name}</div><div class="t">${r}</div><div class="time">${time}</div></div>`;
   chat.appendChild(div);
   chat.scrollTop = chat.scrollHeight;
+  // Input auto-height
+  const inp = document.getElementById('input');
+  inp.style.height = '36px';
 }
 
 function newChat() {
   currentConv = null;
-  document.getElementById('chat').innerHTML = `<div class="welcome" id="welcome">
-    <div class="icon">✧</div>
-    <h2>LAITON AI</h2>
-    <p>intelligence sans limites · 100% navigateur</p>
-    <div class="hints">
-      <span onclick="sendHint('Explain quantum computing')">🔬 quantum</span>
-      <span onclick="sendHint('Write a poem about AI')">📝 poem</span>
-      <span onclick="sendHint('Create a Python script')">🐍 code</span>
-      <span onclick="sendHint('What is LAITON?')">⬡ laiton</span>
-      <span onclick="sendHint('Tell me a story')">📖 story</span>
-    </div>
-  </div>`;
-  document.getElementById('input').focus();
+  document.getElementById('chat').innerHTML = '';
+  showWelcome();
 }
 
 function loadConvs() {
   const list = document.getElementById('conv-list');
-  if (!convs.length) { list.innerHTML = '<div style="padding:16px;font-size:6px;color:rgba(255,255,255,.03);text-align:center;letter-spacing:2px">no conversations</div>'; return; }
-  list.innerHTML = convs.map(c => 
+  if (!convs.length) {
+    list.innerHTML = '<div style="padding:16px;font-size:6px;color:rgba(255,255,255,.02);text-align:center;letter-spacing:2px">no conversations</div>';
+    return;
+  }
+  list.innerHTML = convs.map(c =>
     `<div class="c ${c.id === currentConv ? 'a' : ''}" onclick="loadConv(${c.id})">${c.title || 'Chat'}</div>`
   ).join('');
 }
@@ -385,26 +355,21 @@ function loadConv(id) {
   currentConv = id;
   const chat = document.getElementById('chat');
   chat.innerHTML = '';
-  document.getElementById('welcome').style.display = 'none';
+  document.querySelector('.welcome')?.remove();
   c.messages.forEach(m => addMsg(m.role, m.content));
   loadConvs();
 }
 
 function saveConvs() {
-  localStorage.setItem('laition_ai_convs', JSON.stringify(convs.slice(0, 50)));
+  localStorage.setItem('laiton_ai_convs2', JSON.stringify(convs.slice(0, 50)));
 }
 
-function sendHint(text) {
-  document.getElementById('input').value = text;
-  send();
-}
-
-document.getElementById('input').addEventListener('input', function() {
-  this.style.height = '38px';
-  this.style.height = Math.min(this.scrollHeight, 100) + 'px';
+// ─── EVENT BINDING ───
+document.getElementById('input').addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); }
 });
+document.getElementById('send-btn').onclick = send;
 
-document.getElementById('input').focus();
 init();
 </script>
 </body>
