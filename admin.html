@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>LAITON · ADMIN v2</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0a0a10;font-family:'IBM Plex Mono',monospace;color:#c8d0e0;min-height:100vh;overflow-x:hidden}
+.wrap{max-width:1400px;margin:0 auto;padding:32px 24px}
+h1{font-size:24px;font-weight:500;letter-spacing:6px;color:rgba(255,255,255,.05);margin-bottom:4px;display:flex;align-items:center;gap:12px}
+h1 span{color:rgba(0,212,170,.15);font-size:16px}
+.sub{font-size:9px;letter-spacing:3px;color:rgba(255,255,255,.03);margin-bottom:32px;text-transform:uppercase}
+.row{display:grid;grid-template-columns:1fr 280px;gap:24px;margin-bottom:24px}
+@media(max-width:900px){.row{grid-template-columns:1fr}}
+
+/* Stat cards */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin-bottom:24px}
+.stat{background:rgba(255,255,255,.01);border:1px solid rgba(255,255,255,.03);border-radius:3px;padding:14px 16px;transition:.2s}
+.stat:hover{background:rgba(255,255,255,.02)}
+.stat .l{font-size:6px;letter-spacing:2px;color:rgba(255,255,255,.08);text-transform:uppercase;margin-bottom:4px}
+.stat .v{font-size:20px;font-weight:300;color:rgba(255,255,255,.8);letter-spacing:1px}
+.stat .d{font-size:6px;color:rgba(255,255,255,.03);margin-top:2px}
+
+/* Tables */
+.panel{background:rgba(255,255,255,.01);border:1px solid rgba(255,255,255,.03);border-radius:3px;overflow:hidden;margin-bottom:16px}
+.panel .ph{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid rgba(255,255,255,.02)}
+.panel .ph .pt{font-size:9px;letter-spacing:3px;color:rgba(255,255,255,.12);text-transform:uppercase}
+.panel .ph .pa{font-size:6px;color:rgba(255,255,255,.04);letter-spacing:2px}
+table{width:100%;border-collapse:collapse}
+th{font-size:6px;letter-spacing:2px;color:rgba(255,255,255,.05);text-transform:uppercase;text-align:left;padding:8px 16px;border-bottom:1px solid rgba(255,255,255,.02);font-weight:400}
+td{padding:8px 16px;font-size:10px;color:rgba(255,255,255,.3);border-bottom:1px solid rgba(255,255,255,.01);transition:.2s}
+tr:hover td{color:rgba(255,255,255,.5);background:rgba(255,255,255,.005)}
+tr:last-child td{border-bottom:none}
+td .name{color:rgba(255,255,255,.7);letter-spacing:1px}
+td .email{font-size:7px;color:rgba(255,255,255,.08)}
+.role-badge{display:inline-block;font-size:6px;padding:1px 8px;border-radius:2px;text-transform:uppercase;letter-spacing:1px;border:1px solid rgba(255,255,255,.03);color:rgba(255,255,255,.1)}
+.super_admin{color:rgba(0,212,170,.3);border-color:rgba(0,212,170,.05)}
+.admin{color:rgba(255,215,0,.3);border-color:rgba(255,215,0,.05)}
+.manager{color:rgba(68,136,255,.3);border-color:rgba(68,136,255,.05)}
+.employee{color:rgba(255,255,255,.1);border-color:rgba(255,255,255,.02)}
+.dot{display:inline-block;width:5px;height:5px;border-radius:50%;margin-right:4px;vertical-align:middle}
+.dot.g{background:#00d4aa}
+.dot.y{background:#ffd700}
+.dot.r{background:#ff4444}
+
+/* Activity feed */
+.activity{list-style:none}
+.activity li{padding:8px 16px;border-bottom:1px solid rgba(255,255,255,.01);font-size:8px;color:rgba(255,255,255,.15);display:flex;gap:8px;align-items:center}
+.activity li .time{color:rgba(255,255,255,.04);font-size:6px;flex-shrink:0;width:50px}
+.activity li .action{color:rgba(255,255,255,.3)}
+.activity li .target{color:rgba(0,212,170,.15)}
+
+/* Repo table */
+.repo-dot{width:4px;height:4px;border-radius:50%;display:inline-block;margin-right:6px;vertical-align:middle}
+.repo-page{background:rgba(255,255,255,.01);border:1px solid rgba(255,255,255,.03);border-radius:3px;padding:12px 16px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;transition:.2s}
+.repo-page:hover{background:rgba(255,255,255,.02);border-color:rgba(255,255,255,.06)}
+.repo-page .rn{font-size:10px;color:rgba(255,255,255,.6);letter-spacing:2px}
+.repo-page .rd{font-size:7px;color:rgba(255,255,255,.06);margin-top:2px}
+.repo-page .rl{display:flex;gap:12px}
+.repo-page .rl a{font-size:6px;color:rgba(0,212,170,.1);text-decoration:none;letter-spacing:1px;transition:.2s}
+.repo-page .rl a:hover{color:rgba(0,212,170,.3)}
+
+footer{text-align:center;margin-top:48px;padding-top:24px;border-top:1px solid rgba(255,255,255,.01);font-size:6px;color:rgba(255,255,255,.02);letter-spacing:2px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>⬡ <span>LAITON</span> ADMIN <span style="font-size:8px;color:rgba(255,255,255,.02);letter-spacing:2px;font-weight:300">v2.0</span></h1>
+  <div class="sub">ecosystem management · real-time monitoring</div>
+
+  <div class="stats" id="stats"></div>
+
+  <div class="row">
+    <div>
+      <div class="panel">
+        <div class="ph"><span class="pt">Team Members</span><span class="pa" id="team-count">loading...</span></div>
+        <table id="team-table">
+          <thead><tr><th>Name</th><th>Role</th><th>Email</th><th>Status</th><th>Joined</th></tr></thead>
+          <tbody id="team-body"></tbody>
+        </table>
+      </div>
+      
+      <div class="panel">
+        <div class="ph"><span class="pt">Repositories</span><span class="pa" id="repo-count">loading...</span></div>
+        <div id="repo-list"></div>
+      </div>
+    </div>
+    
+    <div>
+      <div class="panel">
+        <div class="ph"><span class="pt">Activity Feed</span><span class="pa">live</span></div>
+        <ul class="activity" id="activity-feed">
+          <li><span class="time">now</span><span class="action">system initialized</span><span class="target">v2.0</span></li>
+          <li><span class="time">now</span><span class="action">monitoring</span><span class="target">all systems</span></li>
+        </ul>
+      </div>
+      
+      <div class="panel">
+        <div class="ph"><span class="pt">Quick Links</span><span class="pa">neocities</span></div>
+        <div style="padding:12px 16px;display:flex;flex-direction:column;gap:8px">
+          <a href="https://laiton.neocities.org" style="font-size:8px;color:rgba(0,212,170,.1);text-decoration:none;letter-spacing:2px">🌐 laiton.neocities.org</a>
+          <a href="https://github.com/Laiton-Group" style="font-size:8px;color:rgba(0,212,170,.1);text-decoration:none;letter-spacing:2px">⬡ github.com/Laiton-Group</a>
+          <a href="https://laiton.neocities.org/universe" style="font-size:8px;color:rgba(0,212,170,.1);text-decoration:none;letter-spacing:2px">✦ 3D universe explorer</a>
+          <a href="https://laiton.neocities.org/command-center" style="font-size:8px;color:rgba(0,212,170,.1);text-decoration:none;letter-spacing:2px">◇ command center</a>
+          <a href="https://laiton.neocities.org/team" style="font-size:8px;color:rgba(0,212,170,.1);text-decoration:none;letter-spacing:2px">◇ team directory</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer>⬡ LAITON GROUP · building the future · all systems operational</footer>
+</div>
+
+<script>
+const team = [
+  {name:"Laiton",role:"super_admin",email:"laiton@laiton.group",active:true,joined:"2026-07-05"},
+  {name:"Nicolas",role:"super_admin",email:"nicolas@laiton.group",active:true,joined:"2026-07-05"},
+  {name:"Antoine",role:"admin",email:"antoine@laiton.group",active:true,joined:"2026-07-05"},
+  {name:"Theodort",role:"admin",email:"theodort@laiton.group",active:true,joined:"2026-07-05"},
+  {name:"Marie",role:"manager",email:"marie@laiton.group",active:true,joined:"2026-07-05"},
+  {name:"Julien",role:"employee",email:"julien@laiton.group",active:true,joined:"2026-07-05"},
+  {name:"Claire",role:"employee",email:"claire@laiton.group",active:true,joined:"2026-07-05"}
+];
+
+const repos = [
+  {name:"glacial",desc:"3D frozen landscape with icebergs and aurora",branch:"main",url:"https://laiton.neocities.org/glacial"},
+  {name:"shiveria",desc:"Ambient soundscape 3D experience",branch:"main",url:"https://laiton.neocities.org/shiveria"},
+  {name:"deep",desc:"Geometric exploration in the void",branch:"main",url:"https://laiton.neocities.org/deep"},
+  {name:"creative-lab",desc:"Experimental 3D playground",branch:"main",url:"https://laiton.neocities.org/lab"},
+  {name:"hub",desc:"Central ecosystem dashboard",branch:"main",url:"https://laiton-group.github.io/hub"},
+  {name:"peersync-web",desc:"Peer-to-peer sync protocol",branch:"main",url:"https://laiton.neocities.org/peersync"},
+  {name:"laition-manager",desc:"Employee management system",branch:"main",url:"https://laiton.neocities.org/manage"},
+  {name:"ServerIRC2",desc:"Chat server infrastructure",branch:"main",url:"https://github.com/Laiton-Group/ServerIRC2"},
+  {name:"railway",desc:"Railway deployment platform",branch:"main",url:"https://railway.app/project/laiton"}
+];
+
+// Stats
+const active = team.filter(m => m.active).length;
+const totalRepos = repos.length;
+const neocitiesSites = 5; // ai, command-center, team, universe, hub pages
+
+document.getElementById('stats').innerHTML = [
+  {l:'Team Members', v:team.length, d:`${active} active`},
+  {l:'Repositories', v:totalRepos, d:'on GitHub'},
+  {l:'Neocities Pages', v:neocitiesSites, d:'live sites'},
+  {l:'Ecosystem Status', v:'Online', d:'all operational'},
+  {l:'Uptime', v:'120d+', d:'since inception'},
+  {l:'Version', v:'2.0', d:'latest'}
+].map(s => `<div class="stat"><div class="l">${s.l}</div><div class="v">${s.v}</div><div class="d">${s.d}</div></div>`).join('');
+
+// Team table
+document.getElementById('team-body').innerHTML = team.map(m => `
+  <tr>
+    <td><span class="name">${m.name}</span></td>
+    <td><span class="role-badge ${m.role}">${m.role.replace('_',' ')}</span></td>
+    <td><span class="email">${m.email}</span></td>
+    <td><span class="dot ${m.active?'g':'r'}"></span></td>
+    <td style="font-size:7px;color:rgba(255,255,255,.06)">${m.joined}</td>
+  </tr>
+`).join('');
+document.getElementById('team-count').textContent = `${team.length} members`;
+
+// Repo list
+document.getElementById('repo-list').innerHTML = repos.map(r => `
+  <div class="repo-page">
+    <div>
+      <div class="rn"><span class="repo-dot" style="background:${['#88ddff','#66bbff','#4444aa','#aa44ff','#00d4aa','#44ffaa','#ff8844','#4488ff','#8844ff'][repos.indexOf(r)]}"></span>${r.name}</div>
+      <div class="rd">${r.desc}</div>
+    </div>
+    <div class="rl">
+      <a href="${r.url}" target="_blank">open ↗</a>
+    </div>
+  </div>
+`).join('');
+document.getElementById('repo-count').textContent = `${totalRepos} repos`;
+
+// Activity feed - generate live activity
+const feed = document.getElementById('activity-feed');
+const actions = [
+  'deployed', 'updated', 'synced', 'monitored', 'verified',
+  'indexed', 'optimized', 'compiled', 'rendered', 'connected',
+  'authenticated', 'loaded', 'cached', 'processed', 'validated',
+  'generated', 'streamed', 'allocated', 'mounted', 'executed'
+];
+const targets = [
+  'ecosystem', 'database', 'interface', 'pipeline', 'cluster',
+  'registry', 'network', 'cache', 'renderer', 'compiler',
+  'gateway', 'balancer', 'scheduler', 'monitor', 'agent'
+];
+
+function addActivity() {
+  const action = actions[Math.floor(Math.random() * actions.length)];
+  const target = targets[Math.floor(Math.random() * targets.length)];
+  const time = new Date().toLocaleTimeString('fr-FR');
+  const li = document.createElement('li');
+  li.innerHTML = `<span class="time">${time}</span><span class="action">${action}</span><span class="target">${target}</span>`;
+  feed.insertBefore(li, feed.firstChild);
+  
+  // Keep max 20 items
+  while (feed.children.length > 20) {
+    feed.removeChild(feed.lastChild);
+  }
+}
+
+// Add activity every 2-5 seconds
+setInterval(addActivity, 2000 + Math.random() * 3000);
+addActivity();
+</script>
+</body>
+</html>
