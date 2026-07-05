@@ -1,7 +1,12 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 100">
-  <style>text{font-family:'IBM Plex Mono',monospace;font-weight:500}</style>
-  <polygon points="20,50 35,35 65,35 80,50 65,65 35,65" fill="#a0a5b1" stroke="#1a1a1a" stroke-width="1.5"/>
-  <polygon points="30,50 40,40 60,40 70,50 60,60 40,60" fill="#1a1a1a"/>
-  <text x="100" y="62" font-size="42" letter-spacing="8" fill="#1a1a1a">LAITON</text>
-  <text x="104" y="85" font-size="12" letter-spacing="6" fill="rgba(0,0,0,.35)" text-transform="uppercase">ecosystem</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 120">
+  <defs>
+    <style>@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500');</style>
+  </defs>
+  <g transform="translate(10,10)">
+    <polygon points="50,15 80,33 80,67 50,85 20,67 20,33" fill="none" stroke="#1a1a1a" stroke-width="1.5"/>
+    <polygon points="50,22 70,34 70,58 50,70 30,58 30,34" fill="#1a1a1a"/>
+    <polygon points="50,30 60,36 60,50 50,56 40,50 40,36" fill="#a0a5b1"/>
+  </g>
+  <text x="100" y="68" font-family="'IBM Plex Mono',monospace" font-size="48" font-weight="500" letter-spacing="10" fill="#1a1a1a">LAITON</text>
+  <text x="104" y="92" font-family="'IBM Plex Mono',monospace" font-size="10" letter-spacing="7" fill="rgba(0,0,0,.25)" text-transform="uppercase">ecosystem</text>
 </svg>
