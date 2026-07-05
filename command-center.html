@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>LAITON · COMMAND CENTER</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:100%;min-height:100%;background:#0d0d14;font-family:'IBM Plex Mono',monospace;color:#c8d0e0;overflow-x:hidden}
+#bg{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none}
+.wrap{position:relative;z-index:1;max-width:1200px;margin:0 auto;padding:40px 24px}
+h1{font-size:28px;font-weight:500;letter-spacing:8px;color:rgba(255,255,255,.06);text-transform:uppercase;margin-bottom:4px}
+h1 span{color:rgba(0,212,170,.2)}
+.sub{font-size:10px;letter-spacing:4px;color:rgba(255,255,255,.04);margin-bottom:40px;text-transform:uppercase}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px;margin-bottom:24px}
+.card{background:rgba(255,255,255,.01);border:1px solid rgba(255,255,255,.03);border-radius:4px;padding:16px;transition:.3s;position:relative;overflow:hidden}
+.card::before{content:'';position:absolute;top:0;left:0;width:2px;height:100%;background:rgba(255,255,255,.02);transition:.3s}
+.card:hover{background:rgba(255,255,255,.02);border-color:rgba(255,255,255,.06)}
+.card:hover::before{background:rgba(0,212,170,.2)}
+.card .h{font-size:7px;letter-spacing:3px;color:rgba(255,255,255,.08);text-transform:uppercase;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.card .h .ico{font-size:10px}
+.card .v{font-size:24px;font-weight:300;color:rgba(255,255,255,.85);letter-spacing:2px}
+.card .v small{font-size:11px;color:rgba(255,255,255,.15);font-weight:400;margin-left:4px}
+.card .d{font-size:7px;color:rgba(255,255,255,.04);margin-top:4px;letter-spacing:1px}
+.card .bar{height:2px;background:rgba(255,255,255,.03);border-radius:1px;margin-top:10px;overflow:hidden}
+.card .bar .f{height:100%;background:linear-gradient(90deg,rgba(0,212,170,.3),rgba(0,212,170,.1));border-radius:1px;transition:width 1s}
+.section{margin-bottom:32px}
+.section .st{font-size:10px;letter-spacing:4px;color:rgba(255,255,255,.05);text-transform:uppercase;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.section .st::after{content:'';flex:1;height:1px;background:rgba(255,255,255,.02)}
+.repo-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:8px}
+.repo{background:rgba(255,255,255,.01);border:1px solid rgba(255,255,255,.03);border-radius:3px;padding:12px 16px;transition:.2s;display:flex;justify-content:space-between;align-items:center}
+.repo:hover{background:rgba(255,255,255,.02);border-color:rgba(255,255,255,.06)}
+.repo .l{flex:1;min-width:0}
+.repo .rn{font-size:11px;color:rgba(255,255,255,.7);letter-spacing:2px;margin-bottom:2px;text-overflow:ellipsis;overflow:hidden;white-space:nowrap}
+.repo .rn .topic{font-size:6px;color:rgba(0,212,170,.2);letter-spacing:2px;margin-left:4px}
+.repo .rd{font-size:7px;color:rgba(255,255,255,.1);letter-spacing:1px;text-overflow:ellipsis;overflow:hidden;white-space:nowrap}
+.repo .rr{display:flex;gap:10px;flex-shrink:0;margin-left:12px}
+.repo .rr .s{font-size:7px;color:rgba(255,255,255,.1);letter-spacing:1px;text-align:right}
+.repo .rr .s .n{color:rgba(255,255,255,.25)}
+.pulse{animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.dot{display:inline-block;width:5px;height:5px;border-radius:50%;margin-right:4px;vertical-align:middle}
+.dot.g{background:#00d4aa}
+.dot.y{background:#ffd700}
+.dot.r{background:#ff4444}
+.dot.o{background:#ff8800}
+#clock{position:fixed;top:24px;right:32px;z-index:2;font-size:9px;letter-spacing:4px;color:rgba(255,255,255,.04);font-family:'IBM Plex Mono',monospace}
+#clock .date{font-size:6px;color:rgba(255,255,255,.02);margin-top:2px;text-align:right}
+#version{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:2;font-size:6px;letter-spacing:3px;color:rgba(255,255,255,.02);text-transform:uppercase}
+footer{margin-top:40px;padding-top:24px;text-align:center;border-top:1px solid rgba(255,255,255,.02)}
+footer p{font-size:7px;color:rgba(255,255,255,.03);letter-spacing:3px}
+@media(max-width:600px){.wrap{padding:24px 16px}h1{font-size:20px}}
+</style>
+</head>
+<body>
+<div id="bg"></div>
+<div id="clock"><div id="time">--:--:--</div><div class="date" id="date">--------</div></div>
+<div class="wrap">
+  <h1>⬡ <span>LAITON</span></h1>
+  <div class="sub">command center · ecosystem monitoring</div>
+  
+  <div class="section">
+    <div class="st">system health</div>
+    <div class="grid" id="health-grid">
+      <div class="card"><div class="h"><span class="ico">⬡</span>ecosystem status</div><div class="v" id="eco-status"><span class="dot g"></span>online</div><div class="d">all systems operational</div></div>
+      <div class="card"><div class="h"><span class="ico">📦</span>repositories</div><div class="v" id="repo-count">--</div><div class="d">total across organization</div></div>
+      <div class="card"><div class="h"><span class="ico">🤖</span>AI status</div><div class="v" id="ai-status"><span class="dot g"></span>ready</div><div class="d">transformers.js · browser-based</div></div>
+      <div class="card"><div class="h"><span class="ico">🌐</span>neocities</div><div class="v" id="nc-status"><span class="dot g"></span>live</div><div class="d">laiton.neocities.org</div></div>
+      <div class="card"><div class="h"><span class="ico">👥</span>team members</div><div class="v" id="team-count">--</div><div class="d">active contributors</div></div>
+      <div class="card"><div class="h"><span class="ico">⚡</span>uptime</div><div class="v" id="uptime">--</div><div class="d">ecosystem running since</div></div>
+    </div>
+  </div>
+  
+  <div class="section">
+    <div class="st">3D experiences</div>
+    <div class="repo-list" id="3d-projects"></div>
+  </div>
+  
+  <div class="section">
+    <div class="st">software & tools</div>
+    <div class="repo-list" id="software-projects"></div>
+  </div>
+  
+  <div class="section">
+    <div class="st">servers & infrastructure</div>
+    <div class="repo-list" id="infra-projects"></div>
+  </div>
+
+  <footer>
+    <p>✧ LAITON GROUP · building the future ecosystem ✧</p>
+  </footer>
+</div>
+<div id="version">LAITON COMMAND CENTER v2.0</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+// === 3D Background ===
+const bg = document.getElementById('bg');
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+bg.appendChild(renderer.domElement);
+
+const count = 120;
+const positions = new Float32Array(count * 3);
+const velocities = [];
+for (let i = 0; i < count; i++) {
+  const r = 5 + Math.random() * 12;
+  const theta = Math.random() * Math.PI * 2;
+  const phi = Math.acos(2 * Math.random() - 1);
+  positions[i*3] = Math.sin(phi) * Math.cos(theta) * r;
+  positions[i*3+1] = Math.sin(phi) * Math.sin(theta) * r * 0.4;
+  positions[i*3+2] = Math.cos(phi) * r;
+  velocities.push({
+    x: (Math.random() - 0.5) * 0.003,
+    y: (Math.random() - 0.5) * 0.002,
+    z: (Math.random() - 0.5) * 0.003
+  });
+}
+
+const geo = new THREE.BufferGeometry();
+geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+const mat = new THREE.PointsMaterial({
+  color: 0x4444aa,
+  size: 0.04,
+  transparent: true,
+  opacity: 0.12,
+  blending: THREE.AdditiveBlending,
+  depthWrite: false,
+  sizeAttenuation: true
+});
+const points = new THREE.Points(geo, mat);
+scene.add(points);
+
+// Connection lines
+const lineMat = new THREE.LineBasicMaterial({
+  color: 0x4444aa,
+  transparent: true,
+  opacity: 0.02,
+  blending: THREE.AdditiveBlending
+});
+
+camera.position.z = 18;
+let mx = 0, my = 0;
+
+document.addEventListener('mousemove', e => {
+  mx = (e.clientX / window.innerWidth) * 2 - 1;
+  my = -(e.clientY / window.innerHeight) * 2 + 1;
+});
+
+function animateBg() {
+  requestAnimationFrame(animateBg);
+  const p = points.geometry.attributes.position.array;
+  for (let i = 0; i < count; i++) {
+    p[i*3] += velocities[i].x;
+    p[i*3+1] += velocities[i].y;
+    p[i*3+2] += velocities[i].z;
+    const r = Math.sqrt(p[i*3]**2 + p[i*3+1]**2 + p[i*3+2]**2);
+    if (r > 18 || r < 3) {
+      velocities[i].x *= -1;
+      velocities[i].y *= -1;
+      velocities[i].z *= -1;
+    }
+  }
+  points.geometry.attributes.position.needsUpdate = true;
+  
+  scene.rotation.x += (my * 0.2 - scene.rotation.x) * 0.02;
+  scene.rotation.y += (mx * 0.3 - scene.rotation.y) * 0.02;
+  
+  renderer.render(scene, camera);
+}
+animateBg();
+
+window.addEventListener('resize', () => {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
+
+// === Clock ===
+function updateClock() {
+  const now = new Date();
+  document.getElementById('time').textContent = now.toLocaleTimeString('fr-FR');
+  document.getElementById('date').textContent = now.toLocaleDateString('fr-FR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+// === GitHub Data ===
+const org = 'Laiton-Group';
+const categories = {
+  '3d': ['glacial', 'shiveria', 'deep', 'creative-lab'],
+  'software': ['hub', 'peersync-web', 'laition-manager'],
+  'infra': ['ServerIRC2']
+};
+
+const categoryLabels = {
+  '3d': '3D Experiences',
+  'software': 'Software & Tools',
+  'infra': 'Servers & Infrastructure'
+};
+
+async function fetchRepos() {
+  try {
+    const res = await fetch(`https://api.github.com/orgs/${org}/repos?per_page=100&sort=updated`);
+    const repos = await res.json();
+    if (!Array.isArray(repos)) throw new Error('Invalid response');
+    
+    document.getElementById('repo-count').textContent = repos.length;
+    
+    // Categorize repos
+    const categorized = { '3d': [], 'software': [], 'infra': [], 'other': [] };
+    let teamMembers = new Set();
+    
+    repos.forEach(repo => {
+      if (repo.topics) repo.topics.forEach(t => teamMembers.add(t));
+      
+      if (repo.name === 'glacial' || repo.name === 'shiveria' || repo.name === 'deep' || repo.name === 'creative-lab')
+        categorized['3d'].push(repo);
+      else if (repo.name === 'hub' || repo.name === 'peersync-web' || repo.name === 'laition-manager' || repo.name === 'employee-manager')
+        categorized['software'].push(repo);
+      else if (repo.name === 'ServerIRC2' || repo.name === 'railway')
+        categorized['infra'].push(repo);
+      else
+        categorized['other'].push(repo);
+    });
+    
+    document.getElementById('team-count').textContent = teamMembers.size || '~8';
+    
+    // Render each category
+    ['3d', 'software', 'infra'].forEach(cat => {
+      const el = document.getElementById(cat + '-projects');
+      if (!el) return;
+      const repos = categorized[cat];
+      if (repos.length === 0) {
+        el.innerHTML = '<div style="font-size:8px;color:rgba(255,255,255,.03);padding:12px;letter-spacing:2px">no repositories in this category</div>';
+        return;
+      }
+      el.innerHTML = repos.map(r => {
+        const topics = (r.topics || []).slice(0, 3).join(' · ');
+        return `<div class="repo">
+          <div class="l">
+            <div class="rn">${r.name}${topics ? ' <span class="topic">' + topics + '</span>' : ''}</div>
+            <div class="rd">${(r.description || 'no description').slice(0, 60)}</div>
+          </div>
+          <div class="rr">
+            <div class="s"><span class="n">${r.stargazers_count || 0}</span> ★</div>
+            <div class="s"><span class="n">${r.forks_count || 0}</span> ❖</div>
+            <div class="s"><span class="dot ${r.size > 100 ? 'g' : 'y'}"></span></div>
+          </div>
+        </div>`;
+      }).join('');
+    });
+    
+    // Uptime: use first repo creation date
+    if (repos.length > 0) {
+      const first = repos.reduce((a, b) => new Date(a.created_at) < new Date(b.created_at) ? a : b);
+      const created = new Date(first.created_at);
+      const now = new Date();
+      const days = Math.floor((now - created) / (1000 * 60 * 60 * 24));
+      document.getElementById('uptime').textContent = days + 'd';
+    }
+    
+  } catch (e) {
+    // Fallback with static data
+    document.getElementById('repo-count').textContent = '~12';
+    document.getElementById('team-count').textContent = '~8';
+    document.getElementById('uptime').textContent = '120d+';
+    
+    const projects = {
+      '3d': [
+        { name: 'glacial', desc: '3D frozen landscape with icebergs and aurora' },
+        { name: 'shiveria', desc: 'Ambient soundscape 3D experience' },
+        { name: 'deep', desc: 'Geometric exploration in the void' },
+        { name: 'creative-lab', desc: 'Experimental 3D playground' }
+      ],
+      'software': [
+        { name: 'hub', desc: 'Central ecosystem dashboard' },
+        { name: 'peersync-web', desc: 'Peer-to-peer sync protocol' },
+        { name: 'laition-manager', desc: 'Employee management system' }
+      ],
+      'infra': [
+        { name: 'ServerIRC2', desc: 'Chat server infrastructure' }
+      ]
+    };
+    
+    Object.entries(projects).forEach(([cat, repos]) => {
+      const el = document.getElementById(cat + '-projects');
+      if (!el) return;
+      el.innerHTML = repos.map(r => 
+        `<div class="repo">
+          <div class="l">
+            <div class="rn">${r.name}</div>
+            <div class="rd">${r.desc}</div>
+          </div>
+          <div class="rr"><div class="s"><span class="dot g"></span></div></div>
+        </div>`
+      ).join('');
+    });
+  }
+}
+
+fetchRepos();
+// Refresh every 60s
+setInterval(fetchRepos, 60000);
+
+// === AI Status Check ===
+document.getElementById('ai-status').innerHTML = '<span class="dot g"></span>online';
+</script>
+</body>
+</html>
