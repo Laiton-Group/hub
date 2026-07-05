@@ -11,7 +11,7 @@ body{background:#a0a5b1;color:#1a1a1a;font-family:'IBM Plex Mono',monospace;over
 #bg{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0}
 .content{position:relative;z-index:1;height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:20px;text-align:center;pointer-events:none}
 .logo{position:relative;margin-bottom:8px}
-.logo svg{width:clamp(80px,20vw,160px);height:auto}
+.logo img{width:clamp(80px,20vw,160px);height:auto;display:block;margin:0 auto;opacity:.9}
 .logo-text{font-size:clamp(36px,8vw,72px);font-weight:500;color:#1a1a1a;letter-spacing:12px;text-transform:uppercase;line-height:1}
 .tagline{font-size:clamp(10px,1.5vw,14px);color:rgba(0,0,0,.35);margin-top:6px;letter-spacing:6px;text-transform:uppercase}
 .tagline span{color:rgba(0,0,0,.2)}
@@ -29,7 +29,7 @@ body{background:#a0a5b1;color:#1a1a1a;font-family:'IBM Plex Mono',monospace;over
 <div id="bg"></div>
 <div class="content">
   <div class="logo">
-    <img src="logo-icon.svg" width="100" alt="LAITON" style="display:block;margin:0 auto">
+    <img src="githublaiton.png" alt="LAITON">
   </div>
   <div class="logo-text">LAITON</div>
   <div class="tagline">build <span>·</span> code <span>·</span> create</div>
@@ -50,7 +50,7 @@ body{background:#a0a5b1;color:#1a1a1a;font-family:'IBM Plex Mono',monospace;over
   </div>
 </div>
 <div class="status"><span class="dot"></span>online</div>
-<div class="eco">⬡ laiton ecosystem</div>
+<div class="eco">✧ laiton ecosystem</div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
 const container=document.getElementById('bg'),scene=new THREE.Scene(),camera=new THREE.PerspectiveCamera(75,window.innerWidth/window.innerHeight,.1,1000),renderer=new THREE.WebGLRenderer({alpha:true,antialias:true})
