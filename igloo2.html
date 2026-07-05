@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,shrink-to-fit=no">
+<title>IGLOO · LAITON ecosystem</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html{text-rendering:optimizeLegibility;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+html,body{width:100%;height:100%;overflow:hidden;background-color:#a0a5b1;touch-action:none}
+#app{display:block;position:absolute;top:0;left:0;width:100%;height:100%}
+#vignette{position:fixed;top:0;left:0;width:100%;height:100%;z-index:1;pointer-events:none;background:radial-gradient(ellipse at center,transparent 50%,rgba(0,0,0,.06) 100%)}
+#ui{position:fixed;top:0;left:0;width:100%;height:100%;z-index:2;pointer-events:none}
+#loader{position:fixed;top:0;left:0;width:100%;height:100%;z-index:10;display:flex;flex-direction:column;justify-content:center;align-items:center;background-color:#a0a5b1;transition:opacity .8s;pointer-events:none}
+#loader.h{opacity:0;pointer-events:none}
+.loader-a{font-family:'IBM Plex Mono',monospace;font-size:11px;color:rgba(255,255,255,.35);letter-spacing:4px;margin-bottom:4px}
+.loader-a::before{content:'⬡';animation:pulse 1.5s ease-in-out infinite}
+.loader-b{font-family:'IBM Plex Mono',monospace;font-size:8px;color:rgba(255,255,255,.1);letter-spacing:3px}
+@keyframes pulse{0%,100%{opacity:.3}50%{opacity:1}}
+#title{position:absolute;top:28px;right:28px;text-align:right;z-index:3}
+#title h1{font-family:'IBM Plex Mono',monospace;font-size:9px;font-weight:400;color:rgba(0,0,0,.2);letter-spacing:4px;text-transform:uppercase;line-height:2}
+#title h1 span{color:rgba(0,0,0,.3)}
+#title .eco{font-family:'IBM Plex Mono',monospace;font-size:6px;color:rgba(0,0,0,.08);letter-spacing:2px;text-transform:uppercase}
+#nav{position:absolute;top:28px;left:28px;z-index:3;pointer-events:auto;display:flex;gap:8px}
+#nav a{font-family:'IBM Plex Mono',monospace;font-size:7px;color:rgba(0,0,0,.12);text-decoration:none;letter-spacing:3px;text-transform:uppercase;transition:.3s}
+#nav a:hover{color:rgba(0,0,0,.35)}
+#footer{position:absolute;bottom:28px;left:50%;transform:translateX(-50%);z-index:3;text-align:center}
+#footer .pj{font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:500;color:rgba(0,0,0,.3);letter-spacing:2px;margin-bottom:2px;transition:opacity .5s}
+#footer .pd{font-family:'IBM Plex Mono',monospace;font-size:7px;color:rgba(0,0,0,.12);letter-spacing:2px}
+#music-btn{position:absolute;bottom:28px;right:28px;z-index:3;font-family:'IBM Plex Mono',monospace;font-size:6px;color:rgba(0,0,0,.12);background:rgba(0,0,0,.03);border:1px solid rgba(0,0,0,.06);padding:5px 10px;border-radius:2px;cursor:pointer;pointer-events:auto;letter-spacing:3px;text-transform:uppercase;transition:.3s}
+#music-btn:hover{border-color:rgba(0,0,0,.12);color:rgba(0,0,0,.3)}
+#music-btn.on{background:rgba(0,212,170,.04);border-color:rgba(0,212,170,.1);color:rgba(0,212,170,.2)}
+#status{position:absolute;bottom:28px;left:28px;z-index:3;font-family:'IBM Plex Mono',monospace;font-size:5px;color:rgba(0,0,0,.06);letter-spacing:2px}
+</style>
+</head>
+<body>
+<div id="loader"><div class="loader-a"></div><div class="loader-b">loading models</div></div>
+<div id="app"></div>
+<div id="vignette"></div>
+<div id="ui">
+  <div id="title"><h1>IGLOO <span>· LAITON</span></h1><div class="eco">✦ ecosystem</div></div>
+  <div id="nav">
+    <a href="#" id="nav-tw">X</a>
+    <a href="#" id="nav-li">LI</a>
+    <a href="#" id="nav-md">MD</a>
+  </div>
+  <div id="footer"><div class="pj" id="pj-name"></div><div class="pd" id="pj-desc"></div></div>
+  <button id="music-btn">♪</button>
+  <div id="status">⬡</div>
+</div>
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+
+const ASSETS = 'https://www.igloo.inc/assets/geometries/';
+const LIBS = 'https://www.igloo.inc/assets/libs/';
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0xa0a5b1);
+scene.fog = new THREE.Fog(0xa0a5b1, 8, 18);
+
+const camera = new THREE.PerspectiveCamera(50, innerWidth/innerHeight, 0.1, 40);
+camera.position.set(0, 1.8, 6);
+camera.lookAt(0, 0.2, 0);
+
+const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+renderer.setSize(innerWidth, innerHeight);
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 0.9;
+document.getElementById('app').appendChild(renderer.domElement);
+
+const composer = new EffectComposer(renderer);
+composer.addPass(new RenderPass(scene, camera));
+const bloom = new UnrealBloomPass(new THREE.Vector2(innerWidth, innerHeight), 0.15, 0.2, 0.1);
+composer.addPass(bloom);
+
+// Lights
+const amb = new THREE.AmbientLight(0xffffff, 0.4);
+scene.add(amb);
+const hem = new THREE.HemisphereLight(0xa0b5c8, 0x8a95a8, 0.6);
+scene.add(hem);
+const sun = new THREE.DirectionalLight(0xffeedd, 0.7);
+sun.position.set(8, 15, 6);
+sun.castShadow = true;
+sun.shadow.mapSize.set(1024, 1024);
+scene.add(sun);
+scene.add(new THREE.DirectionalLight(0x8899bb, 0.15).position.set(-5, 3, -8));
+
+const world = new THREE.Group();
+scene.add(world);
+
+const mouse = new THREE.Vector2();
+let time = 0, pjIdx = 0;
+
+// Draco Loader
+const draco = new DRACOLoader();
+draco.setDecoderPath(`${LIBS}draco/`);
+draco.setDecoderConfig({ type: 'wasm' });
+
+let modelsLoaded = 0, totalModels = 3;
+
+function modelLoaded() {
+  modelsLoaded++;
+  if (modelsLoaded >= totalModels) {
+    document.getElementById('loader').classList.add('h');
+  }
+}
+
+// Load ground
+draco.load(`${ASSETS}ground.drc`, geo => {
+  const mat = new THREE.MeshStandardMaterial({
+    color: 0x8a95a8, roughness: 0.85, metalness: 0.1,
+    transparent: true, opacity: 0.7
+  });
+  const mesh = new THREE.Mesh(geo, mat);
+  mesh.position.y = -0.45;
+  mesh.receiveShadow = true;
+  world.add(mesh);
+  modelLoaded();
+});
+
+// Load igloo cage
+draco.load(`${ASSETS}igloo/igloo_cage.drc`, geo => {
+  const mat = new THREE.MeshStandardMaterial({
+    color: 0xa7b2d6, roughness: 0.6, metalness: 0.05,
+    transparent: true, opacity: 0.15, wireframe: false
+  });
+  const mesh = new THREE.Mesh(geo, mat);
+  mesh.position.y = 0;
+  mesh.castShadow = true;
+  world.add(mesh);
+  modelLoaded();
+});
+
+// Load mountain
+draco.load(`${ASSETS}mountain.drc`, geo => {
+  const mat = new THREE.MeshStandardMaterial({
+    color: 0x9aa5b5, roughness: 0.9, metalness: 0.0,
+    flatShading: true, transparent: true, opacity: 0.1
+  });
+  const mesh = new THREE.Mesh(geo, mat);
+  mesh.position.set(0, -0.5, 0);
+  mesh.scale.setScalar(0.8);
+  mesh.castShadow = true;
+  world.add(mesh);
+  modelLoaded();
+});
+
+// Backup: if models fail to load, fallback after timeout
+setTimeout(() => {
+  if (modelsLoaded < totalModels) {
+    document.getElementById('loader').classList.add('h');
+    document.querySelector('.loader-b').textContent = 'scene ready';
+  }
+}, 8000);
+
+// === PARTICLES ===
+const pCount = 800;
+const pGeo = new THREE.BufferGeometry();
+const pPos = new Float32Array(pCount * 3);
+const pSizes = new Float32Array(pCount);
+for (let i = 0; i < pCount; i++) {
+  const theta = Math.random() * Math.PI * 2;
+  const phi = Math.acos(2 * Math.random() - 1);
+  const r = 0.5 + Math.random() * 5;
+  pPos[i*3] = Math.sin(phi) * Math.cos(theta) * r;
+  pPos[i*3+1] = Math.sin(phi) * Math.sin(theta) * r * 0.5 + 0.8;
+  pPos[i*3+2] = Math.cos(phi) * r;
+  pSizes[i] = 0.005 + Math.random() * 0.025;
+}
+pGeo.setAttribute('position', new THREE.BufferAttribute(pPos, 3));
+pGeo.setAttribute('size', new THREE.BufferAttribute(pSizes, 1));
+const pMat = new THREE.PointsMaterial({
+  color: 0xffffff, size: 0.02, transparent: true, opacity: 0.08,
+  blending: THREE.AdditiveBlending, depthWrite: false,
+  sizeAttenuation: true
+});
+const particles = new THREE.Points(pGeo, pMat);
+world.add(particles);
+
+// === FLOATING CRYSTALS ===
+const crystalGroup = new THREE.Group();
+for (let i = 0; i < 25; i++) {
+  const g = new THREE.OctahedronGeometry(0.03 + Math.random() * 0.04);
+  const m = new THREE.MeshStandardMaterial({
+    color: 0xd1d6e3, roughness: 0.2, metalness: 0.3,
+    transparent: true, opacity: 0.08 + Math.random() * 0.1
+  });
+  const mesh = new THREE.Mesh(g, m);
+  const a = Math.random() * Math.PI * 2;
+  const r = 0.3 + Math.random() * 2.5;
+  mesh.position.set(Math.cos(a) * r, 0.2 + Math.random() * 2.5, Math.sin(a) * r);
+  mesh.rotation.set(Math.random() * 6, Math.random() * 6, Math.random() * 6);
+  mesh.userData = { rotSpeed: 0.2 + Math.random() * 0.5, floatOff: Math.random() * 100, baseY: mesh.position.y };
+  crystalGroup.add(mesh);
+}
+world.add(crystalGroup);
+
+// === CONNECTION LINES ===
+const linePositions = [];
+for (let i = 0; i < pCount; i++) {
+  for (let j = i + 1; j < pCount; j++) {
+    const dx = pPos[i*3] - pPos[j*3];
+    const dy = pPos[i*3+1] - pPos[j*3+1];
+    const dz = pPos[i*3+2] - pPos[j*3+2];
+    const dist = Math.sqrt(dx*dx + dy*dy + dz*dz);
+    if (dist < 1.5 && Math.random() < 0.08) {
+      linePositions.push(pPos[i*3], pPos[i*3+1], pPos[i*3+2]);
+      linePositions.push(pPos[j*3], pPos[j*3+1], pPos[j*3+2]);
+    }
+  }
+}
+const lGeo = new THREE.BufferGeometry();
+lGeo.setAttribute('position', new THREE.Float32BufferAttribute(linePositions, 3));
+const lMat = new THREE.LineBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.015 });
+const lines = new THREE.LineSegments(lGeo, lMat);
+world.add(lines);
+
+// === FLOATING RINGS ===
+for (let i = 0; i < 4; i++) {
+  const g = new THREE.TorusGeometry(0.3 + i * 0.15, 0.008, 8, 32);
+  const m = new THREE.MeshStandardMaterial({
+    color: 0xa7b2d6, transparent: true, opacity: 0.03,
+    roughness: 0.5, metalness: 0.2, side: THREE.DoubleSide
+  });
+  const mesh = new THREE.Mesh(g, m);
+  mesh.position.y = 1.5 + i * 0.4;
+  mesh.rotation.x = Math.PI / 2;
+  mesh.rotation.z = i * 0.3;
+  mesh.userData = { rotSpeed: 0.1 + i * 0.05 };
+  world.add(mesh);
+}
+
+// === Music ===
+const audio = new Audio('https://raw.githubusercontent.com/Laiton-Group/hub/main/shiveria.mp3');
+audio.loop = true;
+audio.volume = 0.18;
+let musicOn = false;
+const mb = document.getElementById('music-btn');
+mb.addEventListener('click', () => {
+  musicOn = !musicOn;
+  if (musicOn) { audio.play().catch(()=>{}); mb.textContent = '♪'; mb.classList.add('on'); }
+  else { audio.pause(); mb.textContent = '♪'; mb.classList.remove('on'); }
+});
+
+// === Projects ===
+const projects = [
+  { n: 'PORTFOLIO_CO_01 Pudgy Penguins', d: 'Consumer crypto · acquired 2022' },
+  { n: 'PORTFOLIO_CO_02 Abstract', d: 'Layer 2 · ecosystem' },
+  { n: 'PORTFOLIO_CO_03 Cube Labs', d: 'Infrastructure · scaling' }
+];
+const pjn = document.getElementById('pj-name'), pjd = document.getElementById('pj-desc');
+pjn.textContent = projects[0].n;
+pjd.textContent = projects[0].d;
+setInterval(() => {
+  pjIdx = (pjIdx + 1) % projects.length;
+  pjn.style.opacity = 0;
+  setTimeout(() => { pjn.textContent = projects[pjIdx].n; pjd.textContent = projects[pjIdx].d; pjn.style.opacity = 1; }, 300);
+}, 5000);
+
+// === Mouse ===
+document.addEventListener('mousemove', e => {
+  mouse.x = (e.clientX / innerWidth - 0.5) * 2;
+  mouse.y = (e.clientY / innerHeight - 0.5) * 2;
+});
+
+// === Social ===
+document.getElementById('nav-tw').addEventListener('click', e => { e.preventDefault(); window.open('https://twitter.com/iglooinc', '_blank'); });
+document.getElementById('nav-li').addEventListener('click', e => { e.preventDefault(); window.open('https://www.linkedin.com/company/igloo-incorporated', '_blank'); });
+document.getElementById('nav-md').addEventListener('click', e => { e.preventDefault(); window.open('https://medium.com/@iglooinc', '_blank'); });
+
+// === Resize ===
+window.addEventListener('resize', () => {
+  camera.aspect = innerWidth / innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth, innerHeight);
+  composer.setSize(innerWidth, innerHeight);
+});
+
+// === Animation ===
+function anim(t) {
+  requestAnimationFrame(anim);
+  time = t * 0.001;
+
+  const tx = mouse.x * 0.12;
+  const ty = mouse.y * 0.06;
+  camera.position.x += (-tx - camera.position.x) * 0.03;
+  camera.position.y += (1.8 + ty * 0.4 - camera.position.y) * 0.03;
+  camera.lookAt(0, 0.3, 0);
+
+  // Float particles
+  const pp = particles.geometry.attributes.position.array;
+  for (let i = 0; i < pCount; i++) {
+    pp[i*3] += Math.sin(time * 0.3 + i) * 0.0003;
+    pp[i*3+1] += Math.cos(time * 0.2 + i * 0.5) * 0.0002;
+    pp[i*3+2] += Math.sin(time * 0.4 + i * 0.7) * 0.0003;
+  }
+  particles.geometry.attributes.position.needsUpdate = true;
+
+  // Animate crystals
+  crystalGroup.children.forEach((c, i) => {
+    c.rotation.x += Math.sin(time * 0.5 + i) * 0.005;
+    c.rotation.y += 0.008;
+    c.position.y = c.userData.baseY + Math.sin(time * 0.6 + c.userData.floatOff) * 0.04;
+  });
+
+  // Rotate rings
+  world.children.forEach(c => {
+    if (c.geometry && c.geometry.type === 'TorusGeometry') {
+      c.rotation.z += 0.005;
+      c.rotation.x = Math.PI / 2 + Math.sin(time * 0.1 + c.position.y) * 0.05;
+    }
+  });
+
+  composer.render();
+}
+anim();
+</script>
+</body>
+</html>
